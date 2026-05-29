@@ -106,6 +106,8 @@ export default function DashboardClient() {
 
         {/* Top buyers */}
         <TopBuyersList buyers={buyers} />
+        {/* REplace with this when the API is ready */}
+        {/* <TopBuyersList buyers={buyers} /> */}
 
         {/* Mobile: AI chat inline */}
         <div className="mobile-only" style={{ flexDirection: "column" }}>

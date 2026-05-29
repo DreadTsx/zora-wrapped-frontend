@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, Cpu } from "lucide-react";
 import type { CreatorStats } from "@/lib/zora";
+import { useSearchParams } from "next/navigation";
 
 type Msg = { role: "user" | "ai"; text: string };
 
@@ -24,10 +25,16 @@ function generateResponse(q: string, stats: CreatorStats): string {
 }
 
 export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
+  const searchParams = useSearchParams();
+  const wallet = searchParams.get("wallet") ?? "";
+  const short = wallet
+    ? `${wallet.slice(0, 6)}...${wallet.slice(-4)}`
+    : "0x1234...5678";
+
   const [msgs, setMsgs] = useState<Msg[]>([
     {
       role: "ai",
-      text: `System initialized. I've analyzed your contract 0x8f...2a1b. How can I assist you with your data today?`,
+      text: `System initialized. I've analyzed your wallet ${short}. How can I assist you with your data today?`,
     },
   ]);
   const [input, setInput] = useState("");

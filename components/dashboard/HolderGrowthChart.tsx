@@ -1,6 +1,6 @@
 "use client";
 
-// ── STATIC DATA
+// ── STATIC DATA (comment out & use `data` prop when API ready) ──
 const STATIC_GROWTH = [
   { date: "Jan", holders: 120 },
   { date: "Feb", holders: 280 },
@@ -10,7 +10,7 @@ const STATIC_GROWTH = [
   { date: "Jun", holders: 892 },
 ];
 
-// ── PRODUCTION: I need to uncomment this and and pass real data as prop ──
+// ── PRODUCTION: uncomment and pass real data as prop ──
 // interface Props { data: { date: string; holders: number }[] }
 // export default function HolderGrowthChart({ data }: Props) {
 
@@ -22,14 +22,16 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  type TooltipProps,
 } from "recharts";
 
-function CustomTooltip({
-  active,
-  payload,
-  label,
-}: TooltipProps<number, string>) {
+// Custom type — avoids recharts TooltipProps version mismatch
+type CustomTooltipProps = {
+  active?: boolean;
+  payload?: { value: number }[];
+  label?: string;
+};
+
+function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
   return (
     <div
@@ -65,8 +67,10 @@ function CustomTooltip({
 }
 
 export default function HolderGrowthChart() {
-  // STATIC
+  // 🗑️ STATIC: delete this line when API is ready
   const data = STATIC_GROWTH;
+  // ✅ PRODUCTION: uncomment ↓ and remove line above + add { data } to function params
+  // (data already passed as prop)
 
   return (
     <div
@@ -134,7 +138,6 @@ export default function HolderGrowthChart() {
                 fontFamily: "var(--f-mono)",
                 fontSize: 10,
                 fill: "#9f8e7a66",
-                textTransform: "uppercase",
               }}
               axisLine={false}
               tickLine={false}
