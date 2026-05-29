@@ -100,7 +100,9 @@ export default function DashboardClient() {
         </div>
 
         {/* Chart */}
-        <HolderGrowthChart growth={growth} />
+        <HolderGrowthChart />
+        {/* REplace with this when the API is ready */}
+        {/* <HolderGrowthChart growth={growth} /> */}
 
         {/* Top buyers */}
         <TopBuyersList buyers={buyers} />
