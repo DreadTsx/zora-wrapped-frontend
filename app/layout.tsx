@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Sora, Space_Mono } from "next/font/google";
 import QueryProvider from "@/providers/QueryProvider";
+import { CurrencyProvider } from "@/providers/CurrencyProvider";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -47,7 +48,9 @@ export default function RootLayout({
       className={`${playfair.variable} ${sora.variable} ${spaceMono.variable}`}
     >
       <body className="bg-background text-on-surface font-sora antialiased">
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <CurrencyProvider>{children}</CurrencyProvider>
+        </QueryProvider>
       </body>
     </html>
   );

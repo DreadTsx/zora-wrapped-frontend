@@ -5,9 +5,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Copy, LogOut, Download, Users } from "lucide-react";
 import Toggle from "./Toggle";
 import SettingsSection from "./SettingsSection";
+import { useCurrency } from "@/providers/CurrencyProvider";
 import { STATIC_COLLECTORS, STATIC_COLLECTIONS } from "@/lib/zora";
 
-//  Types
+//Types
 type Currency = "ETH" | "USD";
 
 interface NotifState {
@@ -24,7 +25,7 @@ const DEFAULT_NOTIFS: NotifState = {
   whaleActivity: false,
 };
 
-//  CSV helpers
+// CSV helpers
 function downloadCSV(filename: string, rows: string[][], headers: string[]) {
   const csv = [headers, ...rows]
     .map((row) => row.map((cell) => `"${cell}"`).join(","))
@@ -69,6 +70,7 @@ function exportCollectors() {
   downloadCSV("zora-wrapped-collectors.csv", rows, headers);
 }
 
+//Shared row layout
 function SettingRow({
   title,
   desc,
@@ -120,7 +122,7 @@ function SettingRow({
   );
 }
 
-//  Pill toggle for the ETH/USD and Dark/Light)
+// Toggle for ETH/USD and Dark/Light
 function PillGroup({
   options,
   value,
@@ -165,7 +167,7 @@ function PillGroup({
   );
 }
 
-//Main component
+// Main component
 export default function SettingsClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -173,8 +175,9 @@ export default function SettingsClient() {
   const short = wallet
     ? `${wallet.slice(0, 6)}...${wallet.slice(-4)}`
     : "0x1234...5678";
+  const { setCurrency: setGlobalCurrency } = useCurrency();
 
-  // Lazy initialisers — read localStorage once on first render, no useEffect needed
+  // Lazy initialisers they read localStorage once on first render and no useEffect needed
   const [notifs, setNotifs] = useState<NotifState>(() => {
     try {
       const stored = localStorage.getItem("zw-settings");
@@ -186,7 +189,7 @@ export default function SettingsClient() {
     return DEFAULT_NOTIFS;
   });
 
-  const [currency, setCurrency] = useState<Currency>(() => {
+  const [currency, setCurrencyLocal] = useState<Currency>(() => {
     try {
       const stored = localStorage.getItem("zw-settings");
       if (stored) {
@@ -203,10 +206,12 @@ export default function SettingsClient() {
     label: string;
     on: boolean;
   } | null>(null);
+  const [currencyToast, setCurrencyToast] = useState<string | null>(null);
 
   const handleSave = () => {
     try {
       localStorage.setItem("zw-settings", JSON.stringify({ notifs, currency }));
+      setGlobalCurrency(currency);
     } catch {}
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -230,6 +235,14 @@ export default function SettingsClient() {
     whaleActivity: "Whale Activity",
   };
 
+  const handleCurrencyChange = (c: string) => {
+    const next = c as Currency;
+    setCurrencyLocal(next);
+    setGlobalCurrency(next);
+    setCurrencyToast(next === "USD" ? "Switched to USD" : "Switched to ETH");
+    setTimeout(() => setCurrencyToast(null), 1800);
+  };
+
   const setNotif = (key: keyof NotifState) => (val: boolean) => {
     setNotifs((prev) => ({ ...prev, [key]: val }));
     setToggleToast({ label: NOTIF_LABELS[key], on: val });
@@ -247,7 +260,7 @@ export default function SettingsClient() {
         position: "relative",
       }}
     >
-      {/*  Copy toast notification  */}
+      {/* Copy toast notification */}
       <div
         style={{
           position: "fixed",
@@ -283,7 +296,43 @@ export default function SettingsClient() {
         </span>
       </div>
 
-      {/*  Toggle toast notification  */}
+      {/*Currency toast notification */}
+      <div
+        style={{
+          position: "fixed",
+          bottom: 120,
+          left: "50%",
+          transform: `translateX(-50%) translateY(${currencyToast ? "0px" : "12px"})`,
+          opacity: currencyToast ? 1 : 0,
+          transition: "opacity 0.2s ease, transform 0.2s ease",
+          background: "#141414",
+          border: "1px solid #F5A623",
+          padding: "10px 20px",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          zIndex: 997,
+          pointerEvents: "none",
+        }}
+      >
+        <div
+          style={{ width: 6, height: 6, flexShrink: 0, background: "#F5A623" }}
+        />
+        <span
+          style={{
+            fontFamily: "var(--f-mono)",
+            fontSize: 11,
+            textTransform: "uppercase",
+            letterSpacing: "0.14em",
+            color: "#F5A623",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {currencyToast}
+        </span>
+      </div>
+
+      {/* Toggle toast notification */}
       <div
         style={{
           position: "fixed",
@@ -324,7 +373,7 @@ export default function SettingsClient() {
         </span>
       </div>
 
-      {/*  Page heading  */}
+      {/* Page heading  */}
       <div style={{ paddingBottom: 8, borderBottom: "1px solid #2a2a2a" }}>
         <h1
           style={{
@@ -360,7 +409,7 @@ export default function SettingsClient() {
           maxWidth: 640,
         }}
       >
-        {/*  WALLET  */}
+        {/* WALLET */}
         <SettingsSection label="Wallet">
           <div style={{ padding: "20px 24px" }}>
             <p
@@ -461,8 +510,8 @@ export default function SettingsClient() {
           </div>
         </SettingsSection>
 
-        {/*  NOTIFICATIONS  */}
-        <SettingsSection label="Notifications(coming soon)">
+        {/* NOTIFICATIONS  */}
+        <SettingsSection label="Notifications">
           {[
             {
               key: "newHolder" as const,
@@ -496,7 +545,7 @@ export default function SettingsClient() {
           ))}
         </SettingsSection>
 
-        {/*  DISPLAY  */}
+        {/* DISPLAY  */}
         <SettingsSection label="Display">
           <SettingRow
             title="Preferred Currency"
@@ -504,7 +553,7 @@ export default function SettingsClient() {
             right={
               <PillGroup
                 value={currency}
-                onChange={(v) => setCurrency(v as Currency)}
+                onChange={handleCurrencyChange}
                 options={[
                   { label: "ETH", value: "ETH" },
                   { label: "USD", value: "USD" },
@@ -529,7 +578,7 @@ export default function SettingsClient() {
           />
         </SettingsSection>
 
-        {/*  DATA EXPORT  */}
+        {/* DATA EXPORT  */}
         <SettingsSection label="Data Export">
           <SettingRow
             title="Download your full analytics data as CSV"
@@ -608,7 +657,7 @@ export default function SettingsClient() {
           />
         </SettingsSection>
 
-        {/*  SAVE CHANGES  */}
+        {/* SAVE CHANGES */}
         <div
           style={{
             display: "flex",
@@ -634,7 +683,7 @@ export default function SettingsClient() {
               transition: "color 0.2s",
             }}
           >
-            {saved ? "Saved ✓" : "Save_Changes →"}
+            {saved ? "Saved ✓" : "Save Changes →"}
           </button>
         </div>
       </div>

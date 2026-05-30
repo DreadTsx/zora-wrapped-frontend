@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useCurrency } from "@/providers/CurrencyProvider";
 import type { Collector } from "@/lib/zora";
 
 function Badge({ type }: { type: "WHALE" | "FAN" | "NEW" }) {
@@ -54,6 +55,7 @@ export default function CollectorsTable({
   collectors: Collector[];
 }) {
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const { format } = useCurrency();
 
   return (
     <div
@@ -167,7 +169,7 @@ export default function CollectorsTable({
                     color: "#e5e2e1",
                   }}
                 >
-                  {c.totalSpentETH} ETH
+                  {format(c.totalSpentETH)}
                 </span>
               </td>
 

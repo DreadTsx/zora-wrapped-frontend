@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useCurrency } from "@/providers/CurrencyProvider";
 import type { Collection } from "@/lib/zora";
 
-/* Unique gradient per card based on id — gives each thumbnail visual identity */
+/* Unique gradient per card */
 const THUMBNAILS: Record<string, string> = {
   "1": "linear-gradient(135deg, #1a1a1a 0%, #2a2420 40%, #1c1510 100%)",
   "2": "linear-gradient(160deg, #0e0e0e 0%, #1a1208 50%, #2a1f00 100%)",
@@ -84,6 +85,7 @@ export default function CollectionCard({
   index: number;
 }) {
   const [hovered, setHovered] = useState(false);
+  const { format } = useCurrency();
 
   return (
     <div
@@ -100,15 +102,15 @@ export default function CollectionCard({
         animationDelay: `${index * 80}ms`,
       }}
     >
-      {/* ── Thumbnail ──────────────────────────────── */}
-      {/* Desktop: fixed height square-ish thumbnail */}
+      {/*  Thumbnail  */}
+      {/* For Desktop */}
       <div
         className="card-thumb-desktop"
         style={{ height: 180, flexShrink: 0, overflow: "hidden" }}
       >
         <ThumbnailPattern id={collection.id} />
       </div>
-      {/* Mobile: taller thumbnail */}
+      {/* For Mobile */}
       <div
         className="card-thumb-mobile"
         style={{ height: 200, flexShrink: 0, overflow: "hidden" }}
@@ -116,7 +118,7 @@ export default function CollectionCard({
         <ThumbnailPattern id={collection.id} />
       </div>
 
-      {/* ── Card body ──────────────────────────────── */}
+      {/* Card body */}
       <div
         style={{
           padding: "18px 20px 20px",
@@ -157,12 +159,12 @@ export default function CollectionCard({
           {[
             {
               label: "Current Price",
-              value: `${collection.priceETH} ETH`,
+              value: format(collection.priceETH),
               amber: true,
             },
             {
               label: "Total Volume",
-              value: `${collection.volumeETH} ETH`,
+              value: format(collection.volumeETH),
               amber: false,
             },
             {

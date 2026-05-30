@@ -1,5 +1,6 @@
 "use client";
 
+import { useCurrency } from "@/providers/CurrencyProvider";
 import type { Collector } from "@/lib/zora";
 
 function Badge({ type }: { type: "WHALE" | "FAN" | "NEW" }) {
@@ -45,6 +46,7 @@ export default function CollectorMobileCard({
   collector: Collector;
   index: number;
 }) {
+  const { format } = useCurrency();
   return (
     <div
       style={{
@@ -56,7 +58,7 @@ export default function CollectorMobileCard({
         animationDelay: `${index * 60}ms`,
       }}
     >
-      {/* Top row div: rank and badge */}
+      {/* Top row:rank and badge */}
       <div
         style={{
           display: "flex",
@@ -78,7 +80,7 @@ export default function CollectorMobileCard({
         <Badge type={collector.badge} />
       </div>
 
-      {/* Wallet address (very very large) */}
+      {/* Wallet address(large)*/}
       <div
         style={{
           fontFamily: "var(--f-mono)",
@@ -145,12 +147,11 @@ export default function CollectorMobileCard({
               color: "#e5e2e1",
             }}
           >
-            {collector.totalSpentETH} ETH
+            {format(collector.totalSpentETH)}
           </p>
         </div>
       </div>
 
-      {/* Mini styling */}
       <style>{`
         @keyframes cardIn {
           from { opacity: 0; transform: translateY(12px); }

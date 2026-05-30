@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { TrendingUp } from "lucide-react";
+import { useCurrency } from "@/providers/CurrencyProvider";
 import type { CreatorStats } from "@/lib/zora";
 
 function useCountUp(target: number, duration = 1100, enabled = true) {
@@ -20,15 +21,23 @@ function useCountUp(target: number, duration = 1100, enabled = true) {
   return val;
 }
 
-type Card = { label: string; raw: number; fmt: (n: number) => string };
-
-function StatCard({ card, delay }: { card: Card; delay: number }) {
+function StatCard({
+  label,
+  raw,
+  fmt,
+  delay,
+}: {
+  label: string;
+  raw: number;
+  fmt: (n: number) => string;
+  delay: number;
+}) {
   const [vis, setVis] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setVis(true), delay);
     return () => clearTimeout(t);
   }, [delay]);
-  const count = useCountUp(card.raw, 1100, vis);
+  const count = useCountUp(raw, 1100, vis);
 
   return (
     <div
@@ -51,19 +60,19 @@ function StatCard({ card, delay }: { card: Card; delay: number }) {
           marginBottom: 12,
         }}
       >
-        {card.label}
+        {label}
       </p>
       <div style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
         <span
           style={{
             fontFamily: "var(--f-mono)",
             fontWeight: 700,
-            fontSize: "clamp(20px, 2.5vw, 28px)",
+            fontSize: "clamp(20px,2.5vw,28px)",
             color: "#F5A623",
             lineHeight: 1,
           }}
         >
-          {card.fmt(count)}
+          {fmt(count)}
         </span>
         <TrendingUp
           size={12}
@@ -76,30 +85,31 @@ function StatCard({ card, delay }: { card: Card; delay: number }) {
 }
 
 export default function StatCards({ stats }: { stats: CreatorStats }) {
-  const cards: Card[] = [
+  const { format } = useCurrency();
+
+  const cards = [
     {
       label: "Total Mints",
       raw: stats.totalMints,
-      fmt: (n) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n)),
+      fmt: (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n)),
     },
     {
-      label: "Volume (ETH)",
+      label: "Volume",
       raw: Math.round(stats.volumeETH * 10),
-      fmt: (n) => (n / 10).toFixed(1),
+      fmt: (n: number) => format(n / 10),
     },
     {
       label: "Unique Holders",
       raw: stats.uniqueHolders,
-      fmt: (n) => String(n),
+      fmt: (n: number) => String(n),
     },
-    { label: "Growth 30D", raw: stats.growth30d, fmt: (n) => `+${n}%` },
+    { label: "Growth 30D", raw: stats.growth30d, fmt: (n: number) => `+${n}%` },
   ];
 
-  // Renders 4 individual cards — parent (.stat-grid) controls the columns
   return (
     <>
       {cards.map((c, i) => (
-        <StatCard key={c.label} card={c} delay={i * 90} />
+        <StatCard key={c.label} {...c} delay={i * 90} />
       ))}
     </>
   );
