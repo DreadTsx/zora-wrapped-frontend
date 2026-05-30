@@ -12,7 +12,7 @@ import {
   type Collection,
 } from "./zora";
 
-//! STATIC fetch (I need to delete these when API is ready) ──
+//! STATIC fetch (I need to delete these when API is ready)
 
 async function fetchCreatorStatsStatic(_wallet: string): Promise<CreatorStats> {
   await new Promise((r) => setTimeout(r, 400)); // simulate network
@@ -76,7 +76,6 @@ async function fetchCollectionsStatic(_wallet: string): Promise<Collection[]> {
 // }
 
 //*React Query hooks
-
 export function useCreatorStats(wallet: string) {
   return useQuery<CreatorStats>({
     queryKey: ["creator", wallet],

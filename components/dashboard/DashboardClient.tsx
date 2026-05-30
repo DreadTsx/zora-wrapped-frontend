@@ -13,11 +13,11 @@ export default function DashboardClient() {
   const searchParams = useSearchParams();
   const wallet = searchParams.get("wallet") ?? "";
 
-  const { data: stats, isLoading: l1 } = useCreatorStats(wallet);
-  const { data: growth, isLoading: l2 } = useHolderGrowth(wallet);
-  const { data: buyers, isLoading: l3 } = useTopBuyers(wallet);
+  const { data: stats, isLoading: loading1 } = useCreatorStats(wallet);
+  const { data: growth, isLoading: loading2 } = useHolderGrowth(wallet);
+  const { data: buyers, isLoading: loading3 } = useTopBuyers(wallet);
 
-  if (l1 || l2 || l3) return <DashboardLoader />;
+  if (loading1 || loading2 || loading3) return <DashboardLoader />;
 
   if (!stats || !growth || !buyers)
     return (
