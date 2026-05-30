@@ -6,7 +6,7 @@ import {
   LayoutDashboard,
   Library,
   Users,
-  TrendingUp,
+  // TrendingUp,
   Settings,
 } from "lucide-react";
 
@@ -14,7 +14,7 @@ const NAV = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Collections", href: "/dashboard/collections", icon: Library },
   { label: "Collectors", href: "/dashboard/collectors", icon: Users },
-  { label: "Insights", href: "/dashboard/insights", icon: TrendingUp },
+  // { label: "Insights", href: "/dashboard/insights", icon: TrendingUp },
   { label: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
@@ -88,7 +88,7 @@ export default function DashboardSidebar() {
         </div>
       </div>
 
-      {/* Nav */}
+      {/* Nav*/}
       <nav
         style={{
           flex: 1,
@@ -99,7 +99,10 @@ export default function DashboardSidebar() {
         }}
       >
         {NAV.map(({ label, href, icon: Icon }) => {
-          const active = pathname === href || pathname.startsWith(href + "/");
+          const active =
+            href === "/dashboard"
+              ? pathname === "/dashboard"
+              : pathname === href || pathname.startsWith(href + "/");
           return (
             <Link
               key={label}
@@ -137,6 +140,7 @@ export default function DashboardSidebar() {
         })}
       </nav>
 
+      {/* Wallet address pill */}
       <div style={{ padding: "16px 24px", borderTop: "1px solid #2a2a2a" }}>
         <div
           style={{
