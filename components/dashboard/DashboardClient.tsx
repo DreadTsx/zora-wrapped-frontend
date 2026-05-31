@@ -1,9 +1,9 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useCreatorStats, useHolderGrowth, useTopBuyers } from "@/lib/queries";
+import { useCreatorStats, useVolumeData, useTopBuyers } from "@/lib/queries";
 import StatCards from "./StatCards";
-import HolderGrowthChart from "./HolderGrowthChart";
+import VolumeChart from "./VolumeChart";
 import TopBuyersList from "./TopBuyersList";
 import InsightsAIChat from "./InsightsAIChat";
 import ShareCardModal from "./ShareCardModal";
@@ -14,7 +14,7 @@ export default function DashboardClient() {
   const wallet = searchParams.get("wallet") ?? "";
 
   const { data: stats, isLoading: loading1 } = useCreatorStats(wallet);
-  const { data: growth, isLoading: loading2 } = useHolderGrowth(wallet);
+  const { data: growth, isLoading: loading2 } = useVolumeData(wallet);
   const { data: buyers, isLoading: loading3 } = useTopBuyers(wallet);
 
   if (loading1 || loading2 || loading3) return <DashboardLoader />;
@@ -100,14 +100,10 @@ export default function DashboardClient() {
         </div>
 
         {/* Chart */}
-        <HolderGrowthChart />
-        {/* REplace with this when the API is ready */}
-        {/* <HolderGrowthChart growth={growth} /> */}
+        <VolumeChart />
 
         {/* Top buyers */}
         <TopBuyersList buyers={buyers} />
-        {/* REplace with this when the API is ready */}
-        {/* <TopBuyersList buyers={buyers} /> */}
 
         {/* Mobile: AI chat inline */}
         <div className="mobile-only" style={{ flexDirection: "column" }}>

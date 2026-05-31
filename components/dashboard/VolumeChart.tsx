@@ -1,18 +1,17 @@
 "use client";
 
-// ── STATIC DATA (comment out & use `data` prop when API ready) ──
-const STATIC_GROWTH = [
-  { date: "Jan", holders: 120 },
-  { date: "Feb", holders: 280 },
-  { date: "Mar", holders: 410 },
-  { date: "Apr", holders: 520 },
-  { date: "May", holders: 680 },
-  { date: "Jun", holders: 892 },
+//! STATIC DATA
+const STATIC_VOLUME: { date: string; volume: number }[] = [
+  { date: "Jan", volume: 4.2 },
+  { date: "Feb", volume: 7.8 },
+  { date: "Mar", volume: 6.1 },
+  { date: "Apr", volume: 11.4 },
+  { date: "May", volume: 8.9 },
+  { date: "Jun", volume: 15.3 },
 ];
 
-// ── PRODUCTION: uncomment and pass real data as prop ──
-// interface Props { data: { date: string; holders: number }[] }
-// export default function HolderGrowthChart({ data }: Props) {
+//! PRODUCTION:
+// interface Props { data: { date: string; volume: number }[] }
 
 import {
   AreaChart,
@@ -23,8 +22,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useCurrency } from "@/providers/CurrencyProvider";
 
-// Custom type — avoids recharts TooltipProps version mismatch
 type CustomTooltipProps = {
   active?: boolean;
   payload?: { value: number }[];
@@ -32,6 +31,7 @@ type CustomTooltipProps = {
 };
 
 function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
+  const { format } = useCurrency();
   if (!active || !payload?.length) return null;
   return (
     <div
@@ -60,17 +60,17 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
           color: "#F5A623",
         }}
       >
-        {payload[0].value} holders
+        {format(payload[0].value)}
       </p>
     </div>
   );
 }
 
-export default function HolderGrowthChart() {
-  // 🗑️ STATIC: delete this line when API is ready
-  const data = STATIC_GROWTH;
-  // ✅ PRODUCTION: uncomment ↓ and remove line above + add { data } to function params
-  // (data already passed as prop)
+//! PRODUCTION
+// export default function RevenueChart({ data }: Props) {
+export default function RevenueChart() {
+  //!STATIC
+  const data = STATIC_VOLUME;
 
   return (
     <div
@@ -97,7 +97,7 @@ export default function HolderGrowthChart() {
             color: "#e5e2e1",
           }}
         >
-          Holder Growth
+          Monthly Revenue
         </h3>
         <span
           style={{
@@ -120,7 +120,7 @@ export default function HolderGrowthChart() {
             margin={{ top: 4, right: 4, left: -28, bottom: 0 }}
           >
             <defs>
-              <linearGradient id="holderGrad" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#F5A623" stopOpacity={0.22} />
                 <stop offset="100%" stopColor="#F5A623" stopOpacity={0} />
               </linearGradient>
@@ -161,10 +161,10 @@ export default function HolderGrowthChart() {
 
             <Area
               type="monotone"
-              dataKey="holders"
+              dataKey="volume"
               stroke="#F5A623"
               strokeWidth={2.5}
-              fill="url(#holderGrad)"
+              fill="url(#revenueGrad)"
               dot={{ fill: "#0e0e0e", stroke: "#F5A623", strokeWidth: 2, r: 4 }}
               activeDot={{
                 fill: "#F5A623",

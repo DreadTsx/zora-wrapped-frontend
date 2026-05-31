@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   STATIC_CREATOR,
-  STATIC_HOLDER_GROWTH,
+  STATIC_VOLUME_DATA,
   STATIC_TOP_BUYERS,
   STATIC_COLLECTORS,
   STATIC_COLLECTIONS,
   type CreatorStats,
-  type HolderPoint,
+  type VolumePoint,
   type TopBuyer,
   type Collector,
   type Collection,
@@ -19,11 +19,9 @@ async function fetchCreatorStatsStatic(_wallet: string): Promise<CreatorStats> {
   return STATIC_CREATOR;
 }
 
-async function fetchHolderGrowthStatic(
-  _wallet: string,
-): Promise<HolderPoint[]> {
+async function fetchVolumeDataStatic(_wallet: string): Promise<VolumePoint[]> {
   await new Promise((r) => setTimeout(r, 600));
-  return STATIC_HOLDER_GROWTH;
+  return STATIC_VOLUME_DATA;
 }
 
 async function fetchTopBuyersStatic(_wallet: string): Promise<TopBuyer[]> {
@@ -51,9 +49,9 @@ async function fetchCollectionsStatic(_wallet: string): Promise<Collection[]> {
 //   return res.json();
 // }
 //
-// async function fetchHolderGrowth(wallet: string): Promise<HolderPoint[]> {
-//   const res = await fetch(`${API_BASE}/api/creator/${wallet}/growth`);
-//   if (!res.ok) throw new Error("Failed to fetch holder growth");
+// async function fetchVolumeData(wallet: string): Promise<VolumePoint[]> {
+//   const res = await fetch(`${API_BASE}/api/creator/${wallet}/volume`);
+//   if (!res.ok) throw new Error("Failed to fetch volume data");
 //   return res.json();
 // }
 //
@@ -84,10 +82,10 @@ export function useCreatorStats(wallet: string) {
   });
 }
 
-export function useHolderGrowth(wallet: string) {
-  return useQuery<HolderPoint[]>({
-    queryKey: ["holderGrowth", wallet],
-    queryFn: () => fetchHolderGrowthStatic(wallet), //!swap to fetchHolderGrowth(wallet)
+export function useVolumeData(wallet: string) {
+  return useQuery<VolumePoint[]>({
+    queryKey: ["volumeData", wallet],
+    queryFn: () => fetchVolumeDataStatic(wallet), //!swap to fetchVolumeData(wallet)
     enabled: !!wallet,
   });
 }

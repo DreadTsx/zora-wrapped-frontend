@@ -11,9 +11,9 @@ export type CreatorStats = {
   growth30d: number;
 };
 
-export type HolderPoint = {
+export type VolumePoint = {
   date: string;
-  holders: number;
+  volume: number;
 };
 
 export type TopBuyer = {
@@ -41,7 +41,7 @@ export type Collection = {
   thumbnail: string | null;
 };
 
-/!* Static Mock Data*/;
+/*  Static Mock Data*/
 export const STATIC_CREATOR: CreatorStats = {
   wallet: "0x1234567890abcdef1234567890abcdef12345678",
   name: "Zora Creator",
@@ -52,13 +52,13 @@ export const STATIC_CREATOR: CreatorStats = {
   growth30d: 12,
 };
 
-export const STATIC_HOLDER_GROWTH: HolderPoint[] = [
-  { date: "Jan", holders: 120 },
-  { date: "Feb", holders: 280 },
-  { date: "Mar", holders: 410 },
-  { date: "Apr", holders: 520 },
-  { date: "May", holders: 680 },
-  { date: "Jun", holders: 892 },
+export const STATIC_VOLUME_DATA: VolumePoint[] = [
+  { date: "Jan", volume: 4.2 },
+  { date: "Feb", volume: 7.8 },
+  { date: "Mar", volume: 6.1 },
+  { date: "Apr", volume: 11.4 },
+  { date: "May", volume: 8.9 },
+  { date: "Jun", volume: 15.3 },
 ];
 
 export const STATIC_TOP_BUYERS: TopBuyer[] = [
@@ -72,66 +72,66 @@ export const STATIC_TOP_BUYERS: TopBuyer[] = [
 export const STATIC_COLLECTORS: Collector[] = [
   {
     rank: 1,
-    wallet: "0x8a...4b29",
-    coinsHeld: 5,
-    firstPurchase: "Jan 12, 2024",
-    totalSpentETH: 12.4,
+    wallet: "0x8F...3a1B",
+    coinsHeld: 1450,
+    firstPurchase: "Oct 12, 2023",
+    totalSpentETH: 4.2,
     badge: "WHALE",
   },
   {
     rank: 2,
-    wallet: "0x1f...9c0e",
-    coinsHeld: 4,
-    firstPurchase: "Feb 3, 2024",
-    totalSpentETH: 8.1,
-    badge: "WHALE",
-  },
-  {
-    rank: 3,
-    wallet: "0xd4...7a11",
-    coinsHeld: 3,
-    firstPurchase: "Feb 28, 2024",
-    totalSpentETH: 4.5,
-    badge: "FAN",
-  },
-  {
-    rank: 4,
-    wallet: "0x3b...2f88",
-    coinsHeld: 2,
-    firstPurchase: "Mar 14, 2024",
+    wallet: "0x2C...9e4D",
+    coinsHeld: 980,
+    firstPurchase: "Nov 04, 2023",
     totalSpentETH: 2.8,
     badge: "FAN",
   },
   {
-    rank: 5,
-    wallet: "0x7e...1d44",
-    coinsHeld: 1,
-    firstPurchase: "Apr 2, 2024",
-    totalSpentETH: 1.2,
+    rank: 3,
+    wallet: "0x5A...7c2F",
+    coinsHeld: 750,
+    firstPurchase: "Jan 18, 2024",
+    totalSpentETH: 1.9,
     badge: "FAN",
   },
   {
-    rank: 6,
-    wallet: "0xc9...33f1",
-    coinsHeld: 1,
-    firstPurchase: "May 10, 2024",
-    totalSpentETH: 0.8,
+    rank: 4,
+    wallet: "0x1E...4b8A",
+    coinsHeld: 120,
+    firstPurchase: "Mar 02, 2024",
+    totalSpentETH: 0.4,
     badge: "NEW",
+  },
+  {
+    rank: 5,
+    wallet: "0xA9...2d3C",
+    coinsHeld: 88,
+    firstPurchase: "Mar 19, 2024",
+    totalSpentETH: 0.3,
+    badge: "NEW",
+  },
+  {
+    rank: 6,
+    wallet: "0x3F...8e1D",
+    coinsHeld: 640,
+    firstPurchase: "Dec 07, 2023",
+    totalSpentETH: 1.4,
+    badge: "FAN",
   },
   {
     rank: 7,
-    wallet: "0xa2...8b20",
-    coinsHeld: 1,
-    firstPurchase: "May 18, 2024",
-    totalSpentETH: 0.5,
-    badge: "NEW",
+    wallet: "0xB2...5f9A",
+    coinsHeld: 310,
+    firstPurchase: "Feb 11, 2024",
+    totalSpentETH: 0.9,
+    badge: "FAN",
   },
   {
     rank: 8,
-    wallet: "0xf0...91de",
-    coinsHeld: 1,
-    firstPurchase: "Jun 1, 2024",
-    totalSpentETH: 0.3,
+    wallet: "0x7D...1c4E",
+    coinsHeld: 45,
+    firstPurchase: "Apr 28, 2024",
+    totalSpentETH: 0.1,
     badge: "NEW",
   },
 ];
@@ -186,6 +186,7 @@ export const STATIC_COLLECTIONS: Collection[] = [
     thumbnail: null,
   },
 ];
+
 // REAL API CALLS —
 
 // import { createPublicClient, http } from "viem";
