@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Cpu } from "lucide-react";
+import { Send, Cpu, AlertCircle } from "lucide-react";
 import type { CreatorStats } from "@/lib/zora";
-import { useSearchParams } from "next/navigation";
 
 type Msg = { role: "user" | "ai"; text: string };
 
@@ -13,37 +12,24 @@ const CHIPS = [
   "Collector retention",
 ];
 
-function generateResponse(q: string, stats: CreatorStats): string {
-  const ql = q.toLowerCase();
-  if (ql.includes("whale") || ql.includes("biggest"))
-    return `Your biggest whale is 0x8f...2a1b — largest share of your coins, holding since genesis. Consider messaging them directly to build loyalty.`;
-  if (ql.includes("revenue") || ql.includes("projection"))
-    return `At +${stats.growth30d}% over 30 days, you're on track for ${(stats.volumeETH * 1.4).toFixed(1)} ETH volume next month. Your best collection drives ~60% of that.`;
-  if (ql.includes("retention"))
-    return `68.4% of your collectors have held for 30+ days — strong conviction. Only 12% have flipped.`;
-  return `${stats.totalMints} total mints · ${stats.volumeETH} ETH volume · ${stats.uniqueHolders} holders. What would you like to dig into?`;
-}
-
 export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
-  const searchParams = useSearchParams();
-  const wallet = searchParams.get("wallet") ?? "";
-  const short = wallet
-    ? `${wallet.slice(0, 6)}...${wallet.slice(-4)}`
-    : "0x1234...5678";
-
   const [msgs, setMsgs] = useState<Msg[]>([
     {
       role: "ai",
-      text: `System initialized. I've analyzed your wallet ${short}. How can I assist you with your data today?`,
+      text: `System initialized. I've analyzed your contract ${
+        stats.wallet
+          ? `${stats.wallet.slice(0, 6)}...${stats.wallet.slice(-4)}`
+          : "0x8f...2a1b"
+      }. How can I assist you with your data today?`,
     },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const msgCountRef = useRef(1);
 
   useEffect(() => {
-    // Only scroll when a NEW message is added
     if (msgs.length > msgCountRef.current) {
       msgCountRef.current = msgs.length;
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -52,12 +38,42 @@ export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
 
   const send = async (text: string) => {
     if (!text.trim() || loading) return;
-    setMsgs((p) => [...p, { role: "user", text: text.trim() }]);
+
+    const userMsg: Msg = { role: "user", text: text.trim() };
+    setMsgs((prev) => [...prev, userMsg]);
     setInput("");
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 700));
-    setMsgs((p) => [...p, { role: "ai", text: generateResponse(text, stats) }]);
-    setLoading(false);
+    setError(null);
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: text.trim(),
+          stats,
+          // Pass conversation history for context (exclude the system greeting)
+          history: msgs.slice(1),
+        }),
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error); // server sends real error message now
+
+      setMsgs((prev) => [...prev, { role: "ai", text: data.reply }]);
+    } catch (err) {
+      console.error("Chat error:", err);
+      const errMsg =
+        err instanceof Error ? err.message : "Something went wrong. Try again.";
+      setError(errMsg);
+      // Restore the user message so they can retry
+      setMsgs((prev) => prev.slice(0, -1));
+      setInput(text.trim());
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -70,7 +86,7 @@ export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
         border: "1px solid #2a2a2a",
       }}
     >
-      {/* Header */}
+      {/*  Header  */}
       <div
         style={{
           display: "flex",
@@ -92,9 +108,39 @@ export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
         >
           Insights AI
         </span>
+        {/* Live indicator */}
+        <div
+          style={{
+            marginLeft: "auto",
+            display: "flex",
+            alignItems: "center",
+            gap: 5,
+          }}
+        >
+          <div
+            style={{
+              width: 5,
+              height: 5,
+              background: "#22c55e",
+              borderRadius: "50%",
+              animation: "aiPulse 2s ease infinite",
+            }}
+          />
+          <span
+            style={{
+              fontFamily: "var(--f-mono)",
+              fontSize: 9,
+              textTransform: "uppercase",
+              letterSpacing: "0.14em",
+              color: "#22c55e55",
+            }}
+          >
+            Live
+          </span>
+        </div>
       </div>
 
-      {/* Chips */}
+      {/* Suggested chips  */}
       <div
         style={{
           display: "flex",
@@ -109,6 +155,7 @@ export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
           <button
             key={c}
             onClick={() => send(c)}
+            disabled={loading}
             style={{
               fontFamily: "var(--f-mono)",
               fontSize: 9,
@@ -118,12 +165,15 @@ export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
               border: "1px solid #2a2a2a",
               background: "transparent",
               color: "#9f8e7a",
-              cursor: "pointer",
+              cursor: loading ? "not-allowed" : "pointer",
               transition: "all 0.15s",
+              opacity: loading ? 0.4 : 1,
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "#F5A623";
-              e.currentTarget.style.color = "#F5A623";
+              if (!loading) {
+                e.currentTarget.style.borderColor = "#F5A623";
+                e.currentTarget.style.color = "#F5A623";
+              }
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.borderColor = "#2a2a2a";
@@ -135,6 +185,7 @@ export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
         ))}
       </div>
 
+      {/*  Messages  */}
       <div
         style={{
           flex: 1,
@@ -159,7 +210,7 @@ export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
                 maxWidth: "90%",
                 fontFamily: "var(--f-sans)",
                 fontSize: 13,
-                lineHeight: 1.6,
+                lineHeight: 1.65,
                 color: m.role === "user" ? "#e5e2e1" : "#d7c3ae",
                 background: m.role === "user" ? "#1c1b1b" : "transparent",
                 border: m.role === "user" ? "1px solid #2a2a2a" : "none",
@@ -170,8 +221,17 @@ export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
             </div>
           </div>
         ))}
+
+        {/* Loading dots */}
         {loading && (
-          <div style={{ display: "flex", gap: 4 }}>
+          <div
+            style={{
+              display: "flex",
+              gap: 4,
+              alignItems: "center",
+              paddingLeft: 2,
+            }}
+          >
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
@@ -179,18 +239,68 @@ export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
                   width: 6,
                   height: 6,
                   background: "#F5A623",
-                  opacity: 0.5,
                   animation: "chatPulse 1.2s ease infinite",
                   animationDelay: `${i * 0.2}s`,
+                  opacity: 0.5,
                 }}
               />
             ))}
           </div>
         )}
+
+        {/* Error state */}
+        {error && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+              gap: 8,
+              padding: "10px 12px",
+              border: "1px solid #ff4444",
+              background: "transparent",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+              <AlertCircle
+                size={13}
+                strokeWidth={1.5}
+                style={{ color: "#ff4444", flexShrink: 0, marginTop: 1 }}
+              />
+              <span
+                style={{
+                  fontFamily: "var(--f-mono)",
+                  fontSize: 10,
+                  color: "#ff4444",
+                  letterSpacing: "0.06em",
+                  lineHeight: 1.5,
+                }}
+              >
+                {error}
+              </span>
+            </div>
+            <button
+              onClick={() => setError(null)}
+              style={{
+                background: "none",
+                border: "none",
+                color: "#ff444488",
+                cursor: "pointer",
+                fontSize: 14,
+                flexShrink: 0,
+                lineHeight: 1,
+                padding: 0,
+              }}
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
+      {/*  Input  */}
       <div
         style={{
           display: "flex",
@@ -204,8 +314,9 @@ export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && send(input)}
+          onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && send(input)}
           placeholder="Query your contract..."
+          disabled={loading}
           style={{
             flex: 1,
             fontFamily: "var(--f-mono)",
@@ -214,23 +325,35 @@ export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
             background: "transparent",
             border: "none",
             outline: "none",
+            opacity: loading ? 0.5 : 1,
           }}
         />
         <button
           onClick={() => send(input)}
           disabled={!input.trim() || loading}
           style={{
-            color: input.trim() ? "#F5A623" : "#2a2a2a",
+            color: input.trim() && !loading ? "#F5A623" : "#2a2a2a",
             background: "none",
             border: "none",
             cursor: "pointer",
             display: "flex",
+            transition: "color 0.15s",
           }}
         >
           <Send size={14} strokeWidth={2} />
         </button>
       </div>
-      <style>{`@keyframes chatPulse{0%,100%{transform:scaleY(.5);opacity:.3}50%{transform:scaleY(1.4);opacity:1}}`}</style>
+
+      <style>{`
+        @keyframes chatPulse {
+          0%, 100% { transform: scaleY(0.5); opacity: 0.3; }
+          50%       { transform: scaleY(1.4); opacity: 1; }
+        }
+        @keyframes aiPulse {
+          0%, 100% { opacity: 1; }
+          50%       { opacity: 0.3; }
+        }
+      `}</style>
     </div>
   );
 }
