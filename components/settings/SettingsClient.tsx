@@ -511,7 +511,7 @@ export default function SettingsClient() {
         </SettingsSection>
 
         {/* NOTIFICATIONS  */}
-        <SettingsSection label="Notifications">
+        <SettingsSection label="Notifications(Unavailable for now)">
           {[
             {
               key: "newHolder" as const,
@@ -540,7 +540,14 @@ export default function SettingsClient() {
               title={title}
               desc={desc}
               last={last}
-              right={<Toggle enabled={notifs[key]} onChange={setNotif(key)} />}
+              right={
+                <Toggle
+                  enabled={notifs[key]}
+                  onChange={setNotif(key)}
+                  disabled
+                  // disabled for now till this feature is complete
+                />
+              }
             />
           ))}
         </SettingsSection>
