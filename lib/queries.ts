@@ -12,6 +12,43 @@ import {
   type Collection,
 } from "./zora";
 
+// const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+
+//! NLP Agent
+// Connects to POST /query on the Rust backend.
+// Accepts any natural language query containing a wallet address.
+// e.g. "How many holders in 0x..." or "Show top 5 buyers of 0x..."
+
+// export async function askAgent(
+//   query: string
+// ): Promise<{ result?: string; error?: string }> {
+//   if (!query.trim()) {
+//     return { error: "Please enter a query." };
+//   }
+
+//   try {
+//     const res = await fetch(`${API_BASE}/query`, {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ query }),
+//     });
+
+//     if (!res.ok) {
+//       return { error: `Server error: ${res.status}` };
+//     }
+
+//     const data = await res.json();
+
+//     if (data.error) {
+//       return { error: data.error };
+//     }
+
+//     return { result: data.result };
+//   } catch {
+//     return { error: "Could not reach the agent. Is it running on port 3001?" };
+//   }
+// }
+
 //! STATIC fetch (I need to delete these when API is ready)
 
 async function fetchCreatorStatsStatic(_wallet: string): Promise<CreatorStats> {
@@ -41,7 +78,6 @@ async function fetchCollectionsStatic(_wallet: string): Promise<Collection[]> {
 
 //* PRODUCTION fetch ( I need to uncomment when thee API is ready)
 
-// const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 //
 // async function fetchCreatorStats(wallet: string): Promise<CreatorStats> {
 //   const res = await fetch(`${API_BASE}/api/creator/${wallet}`);

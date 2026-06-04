@@ -41,6 +41,8 @@ export type Collection = {
   thumbnail: string | null;
 };
 
+// const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+
 /*  Static Mock Data*/
 export const STATIC_CREATOR: CreatorStats = {
   wallet: "0x1234567890abcdef1234567890abcdef12345678",
@@ -189,107 +191,37 @@ export const STATIC_COLLECTIONS: Collection[] = [
 
 // REAL API CALLS —
 
-// import { createPublicClient, http } from "viem";
-// import { base } from "viem/chains";
-
-// const ZORA_GRAPHQL = "https://api.zora.co/graphql";
-
-// const publicClient = createPublicClient({
-//   chain: base,
-//   transport: http(),
-// });
+// ─── Production API ───────────────────────────────────────────────────────────
+// These call your Rust backend (localhost:3001), NOT Zora directly.
+// The Rust backend handles auth, rate limiting, and data transformation.
+// Uncomment each function as the corresponding route is added to server.rs.
 
 // export async function getCreatorStats(wallet: string): Promise<CreatorStats> {
-//   const res = await fetch(ZORA_GRAPHQL, {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify({
-//       query: `
-//         query CreatorStats($wallet: String!) {
-//           aggregateStat {
-//             nftCount(where: { creatorAddresses: [$wallet] })
-//             ownerCount(where: { creatorAddresses: [$wallet] })
-//             salesVolume(where: { creatorAddresses: [$wallet] }) {
-//               totalSalesVolumeETH
-//             }
-//           }
-//         }
-//       `,
-//       variables: { wallet },
-//     }),
-//   });
-//   const data = await res.json();
-//   // Transform response into CreatorStats shape
-//   return {
-//     wallet,
-//     name:          "Zora Creator",
-//     avatar:        null,
-//     totalMints:    data.data.aggregateStat.nftCount,
-//     volumeETH:     data.data.aggregateStat.salesVolume.totalSalesVolumeETH,
-//     uniqueHolders: data.data.aggregateStat.ownerCount,
-//     growth30d:     0, // compute separately from time-series data
-//   };
+//   const res = await fetch(`${API_BASE}/api/creator/${wallet}`);
+//   if (!res.ok) throw new Error("Failed to fetch creator stats");
+//   return res.json();
 // }
 
-// export async function getHolderGrowth(wallet: string): Promise<HolderPoint[]> {
-//   // Fetch time-series holder data from Zora API
-//   const res = await fetch(`https://api.zora.co/collections?creatorAddress=${wallet}`);
-//   const data = await res.json();
-//   // Transform into HolderPoint[] …
-//   return data;
+// export async function getVolumeData(wallet: string): Promise<VolumePoint[]> {
+//   const res = await fetch(`${API_BASE}/api/creator/${wallet}/volume`);
+//   if (!res.ok) throw new Error("Failed to fetch volume data");
+//   return res.json();
 // }
 
 // export async function getTopBuyers(wallet: string): Promise<TopBuyer[]> {
-//   const res = await fetch(ZORA_GRAPHQL, {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify({
-//       query: `
-//         query TopBuyers($wallet: String!) {
-//           sales(
-//             where: { sellerAddress: $wallet }
-//             sort: { sortKey: ETH_PRICE, sortDirection: DESC }
-//             pagination: { limit: 10 }
-//           ) {
-//             nodes {
-//               buyerAddress
-//               priceInfo { priceDecimal }
-//             }
-//           }
-//         }
-//       `,
-//       variables: { wallet },
-//     }),
-//   });
-//   const data = await res.json();
-//   // Transform into TopBuyer[] …
-//   return data;
+//   const res = await fetch(`${API_BASE}/api/creator/${wallet}/top-buyers`);
+//   if (!res.ok) throw new Error("Failed to fetch top buyers");
+//   return res.json();
+// }
+
+// export async function getCollectors(wallet: string): Promise<Collector[]> {
+//   const res = await fetch(`${API_BASE}/api/creator/${wallet}/collectors`);
+//   if (!res.ok) throw new Error("Failed to fetch collectors");
+//   return res.json();
 // }
 
 // export async function getCollections(wallet: string): Promise<Collection[]> {
-//   const res = await fetch(ZORA_GRAPHQL, {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify({
-//       query: `
-//         query Collections($wallet: String!) {
-//           tokens(
-//             where: { creatorAddresses: [$wallet] }
-//             sort: { sortKey: ETH_SALE_PRICE, sortDirection: DESC }
-//           ) {
-//             nodes {
-//               tokenId
-//               name
-//               image { url }
-//               markets { floorAsk { price { decimal } } }
-//             }
-//           }
-//         }
-//       `,
-//       variables: { wallet },
-//     }),
-//   });
-//   const data = await res.json();
-//   // Transform into Collection[] …
-//   return data;
+//   const res = await fetch(`http://localhost:3001/api/creator/${wallet}/collections`);
+//   if (!res.ok) throw new Error("Failed to fetch collections");
+//   return res.json();
 // }
