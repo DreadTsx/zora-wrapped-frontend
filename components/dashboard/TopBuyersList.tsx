@@ -122,7 +122,7 @@ export default function TopBuyersList({ buyers }: { buyers: TopBuyer[] }) {
               flexShrink: 0,
             }}
           >
-            {format(b.amountETH)}
+            {format(b.amount_eth)}
           </span>
         </div>
       ))}

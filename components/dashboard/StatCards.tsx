@@ -90,17 +90,17 @@ export default function StatCards({ stats }: { stats: CreatorStats }) {
   const cards = [
     {
       label: "Total Mints",
-      raw: stats.totalMints,
+      raw: stats.total_mints,
       fmt: (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n)),
     },
     {
       label: "Volume",
-      raw: Math.round(stats.volumeETH * 10),
+      raw: Math.round(stats.volume_eth * 10),
       fmt: (n: number) => format(n / 10),
     },
     {
       label: "Unique Holders",
-      raw: stats.uniqueHolders,
+      raw: stats.unique_holders,
       fmt: (n: number) => String(n),
     },
     { label: "Growth 30D", raw: stats.growth30d, fmt: (n: number) => `+${n}%` },

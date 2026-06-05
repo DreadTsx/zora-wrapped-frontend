@@ -5,9 +5,9 @@ export type CreatorStats = {
   wallet: string;
   name: string;
   avatar: string | null;
-  totalMints: number;
-  volumeETH: number;
-  uniqueHolders: number;
+  total_mints: number;
+  volume_eth: number;
+  unique_holders: number;
   growth30d: number;
 };
 
@@ -20,23 +20,23 @@ export type TopBuyer = {
   rank: number;
   wallet: string;
   percentage: number;
-  amountETH: number;
+  amount_eth: number;
 };
 
 export type Collector = {
   rank: number;
   wallet: string;
-  coinsHeld: number;
-  firstPurchase: string;
-  totalSpentETH: number;
+  coins_held: number;
+  first_purchase: string;
+  total_spent_eth: number;
   badge: "WHALE" | "FAN" | "NEW";
 };
 
 export type Collection = {
   id: string;
   name: string;
-  priceETH: number;
-  volumeETH: number;
+  price_eth: number;
+  volume_eth: number;
   holders: number;
   thumbnail: string | null;
 };
