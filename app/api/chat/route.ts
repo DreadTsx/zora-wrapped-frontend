@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { CreatorStats } from "@/lib/zora";
+import type { CreatorStats, TopBuyer, Collector, Collection } from "@/lib/zora";
 
 interface ChatRequest {
   message: string;
@@ -7,6 +7,11 @@ interface ChatRequest {
   history?: Array<{ role: string; text: string }>;
 }
 
+/**
+ * POST /api/chat
+ * Accepts a natural language query and returns AI-generated insights
+ * about the user's contract/creator data
+ */
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as ChatRequest;
@@ -26,37 +31,44 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Call the NLP agent endpoint with production URL
     const nlpEndpoint =
-      process.env.NLP_AGENT_URL || "https://zora-wrapped-back.onrender.com/query";
+      process.env.NLP_AGENT_URL ||
+      "https://zora-wrapped-back.onrender.com/query";
 
-    // ✅ AbortController replaces the invalid `timeout` option
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    console.log("[API] Calling NLP endpoint:", nlpEndpoint);
+    console.log("[API] Query:", message);
 
-    let nlpResponse: Response;
-    try {
-      nlpResponse = await fetch(nlpEndpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: message,
-          wallet: stats.wallet,
-        }),
-        signal: controller.signal,
-      });
-    } finally {
-      clearTimeout(timeoutId);
-    }
+    const nlpResponse = await fetch(nlpEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: message,
+      }),
+      timeout: 30000, // 30 second timeout
+    });
 
     console.log("[API] NLP response status:", nlpResponse.status);
 
+    const nlpData = await nlpResponse.json();
+    console.log("[API] NLP response data:", nlpData);
+
     if (!nlpResponse.ok) {
-      throw new Error(`NLP Agent error: ${nlpResponse.status}`);
+      // Even if status is not ok, check if we have an error message
+      if (nlpData.error) {
+        return NextResponse.json(
+          {
+            reply: `I couldn't understand that query. Try asking about: "Who is my biggest whale?", "What's my total volume?", or "How many unique collectors do I have?"`,
+          },
+          { status: 200 }
+        );
+      }
+      throw new Error(`NLP Agent returned ${nlpResponse.status}`);
     }
 
-    const nlpData = await nlpResponse.json();
-
+    // Handle NLP agent response
     if (nlpData.error) {
+      // NLP agent couldn't understand the query
       return NextResponse.json(
         {
           reply: `I couldn't understand that query. Try asking about: "Who is my biggest whale?", "What's my total volume?", or "How many unique collectors do I have?"`,
@@ -65,6 +77,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Return the NLP agent's response
     return NextResponse.json(
       {
         reply: nlpData.result || "Unable to process your query.",
@@ -80,11 +93,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error:
-          errorMsg.includes("ECONNREFUSED") || errorMsg.includes("fetch failed")
+          errorMsg.includes("ECONNREFUSED") ||
+          errorMsg.includes("fetch failed") ||
+          errorMsg.includes("ERR_INVALID_URL")
             ? "NLP service unavailable. Please try again."
-            : errorMsg.includes("abort") || errorMsg.includes("AbortError")
-              ? "Request timed out. Please try again."
-              : errorMsg,
+            : errorMsg,
       },
       { status: 500 }
     );
