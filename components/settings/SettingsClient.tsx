@@ -44,8 +44,8 @@ async function exportAnalytics(wallet: string) {
   const data = await getCollections(wallet);
   const rows = data.map((c) => [
     c.name,
-    String(c.priceETH),
-    String(c.volumeETH),
+    String(c.price_eth),
+    String(c.volume_eth),
     String(c.holders),
   ]);
   downloadCSV("zora-wrapped-analytics.csv", rows, headers);
@@ -64,9 +64,9 @@ async function exportCollectors(wallet: string) {
   const rows = data.map((c) => [
     String(c.rank),
     c.wallet,
-    String(c.coinsHeld),
-    c.firstPurchase,
-    String(c.totalSpentETH),
+    String(c.coins_held),
+    c.first_purchase,
+    String(c.total_spent_eth),
     c.badge,
   ]);
   downloadCSV("zora-wrapped-collectors.csv", rows, headers);

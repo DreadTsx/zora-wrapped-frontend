@@ -91,7 +91,7 @@ export default function CollectorMobileCard({
           marginBottom: 14,
         }}
       >
-        {collector.wallet}
+        {`${collector.wallet.slice(0, 6)}...${collector.wallet.slice(-4)}`}
       </div>
 
       {/* Stats grid */}
@@ -123,7 +123,7 @@ export default function CollectorMobileCard({
               color: "#e5e2e1",
             }}
           >
-            {collector.coinsHeld.toLocaleString()}
+            {collector.coins_held.toLocaleString()}
           </p>
         </div>
         <div>
@@ -147,7 +147,7 @@ export default function CollectorMobileCard({
               color: "#e5e2e1",
             }}
           >
-            {format(collector.totalSpentETH)}
+            {format(collector.total_spent_eth)}
           </p>
         </div>
       </div>

@@ -65,17 +65,40 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
   // format(ethAmount) → "1.2 ETH" or "$3,840.00"
   const format = useCallback(
-    (ethAmount: number, decimals = 2): string => {
+    (ethAmount: number | undefined | null, decimals = 2): string => {
+      // Handle undefined or null values
+      if (ethAmount === undefined || ethAmount === null || typeof ethAmount !== "number") {
+        return "0.00 ETH";
+      }
+
+      // Handle invalid numbers (NaN, Infinity)
+      if (!isFinite(ethAmount)) {
+        return "0.00 ETH";
+      }
+
+      // For very small values, show more decimal places to avoid "0.00"
+      let displayDecimals = decimals;
+      if (Math.abs(ethAmount) > 0 && Math.abs(ethAmount) < 0.01) {
+        displayDecimals = 4;
+      }
+
+      // For very large numbers (likely scientific notation from API), normalize them
+      // Check if number is extremely large (typical of scientific notation errors)
+      if (Math.abs(ethAmount) > 1e10) {
+        // Likely a data error - reset to 0
+        return "0.00 ETH";
+      }
+
       if (currency === "USD") {
         const usd = ethAmount * ethPrice;
         return new Intl.NumberFormat("en-US", {
           style: "currency",
           currency: "USD",
-          minimumFractionDigits: decimals,
-          maximumFractionDigits: decimals,
+          minimumFractionDigits: displayDecimals,
+          maximumFractionDigits: displayDecimals,
         }).format(usd);
       }
-      return `${ethAmount.toFixed(decimals)} ETH`;
+      return `${ethAmount.toFixed(displayDecimals)} ETH`;
     },
     [currency, ethPrice],
   );

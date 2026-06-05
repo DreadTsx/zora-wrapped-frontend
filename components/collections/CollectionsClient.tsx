@@ -12,9 +12,9 @@ type SortKey = "volume" | "holders" | "price";
 
 function sortCollections(list: Collection[], sort: SortKey): Collection[] {
   return [...list].sort((a, b) => {
-    if (sort === "volume") return b.volumeETH - a.volumeETH;
+    if (sort === "volume") return b.volume_eth - a.volume_eth;
     if (sort === "holders") return b.holders - a.holders;
-    if (sort === "price") return b.priceETH - a.priceETH;
+    if (sort === "price") return b.price_eth - a.price_eth;
     return 0;
   });
 }

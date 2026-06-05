@@ -28,7 +28,7 @@ export default function ShareCardModal({ stats }: { stats: CreatorStats }) {
   };
 
   const handleShare = async () => {
-    const text = `My Zora stats 🔥\n${stats.totalMints.toLocaleString()} total sales · ${stats.uniqueHolders.toLocaleString()} collectors · ${stats.volumeETH} ETH volume\n\nvia @ZoraWrapped`;
+    const text = `My Zora stats 🔥\n${stats.total_mints.toLocaleString()} total sales · ${stats.unique_holders.toLocaleString()} collectors · ${stats.volume_eth} ETH volume\n\nvia @ZoraWrapped`;
     if (navigator.share)
       await navigator.share({ text, url: window.location.href });
     else {
@@ -216,19 +216,19 @@ export default function ShareCardModal({ stats }: { stats: CreatorStats }) {
                   {[
                     {
                       label: "Total Sales",
-                      value: stats.totalMints.toLocaleString(),
+                      value: stats.total_mints.toLocaleString(),
                       unit: null,
                       amber: false,
                     },
                     {
                       label: "Unique Collectors",
-                      value: stats.uniqueHolders.toLocaleString(),
+                      value: stats.unique_holders.toLocaleString(),
                       unit: null,
                       amber: true,
                     },
                     {
                       label: "Secondary Vol",
-                      value: stats.volumeETH.toFixed(1),
+                      value: stats.volume_eth.toFixed(1),
                       unit: "ETH",
                       amber: false,
                     },

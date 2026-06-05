@@ -8,8 +8,8 @@ type Msg = { role: "user" | "ai"; text: string };
 
 const CHIPS = [
   "Who is my biggest whale?",
-  "Project revenue projection",
-  "Collector retention",
+  "What is my total volume?",
+  "How many unique collectors?",
 ];
 
 export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {

@@ -159,12 +159,12 @@ export default function CollectionCard({
           {[
             {
               label: "Current Price",
-              value: format(collection.priceETH),
+              value: format(collection.price_eth),
               amber: true,
             },
             {
               label: "Total Volume",
-              value: format(collection.volumeETH),
+              value: format(collection.volume_eth),
               amber: false,
             },
             {
