@@ -1,6 +1,6 @@
 # Zora Wrapped - Creator Dashboard
 
-A modern dashboard for Zora protocol creators to visualize collection performance, analyze top buyers, manage collectors, and get AI-powered insights about their token economics.
+A modern dashboard for Zora protocol creators to visualize collection performance, analyze top buyers, manage collectors, and get AI-powered insights about their token economics. Powered by Aomi
 
 ## Features
 
