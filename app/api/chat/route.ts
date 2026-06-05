@@ -31,40 +31,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Call the NLP agent endpoint with production URL
+    // Call the NLP agent endpoint
     const nlpEndpoint =
-      process.env.NLP_AGENT_URL ||
-      "https://zora-wrapped-back.onrender.com/query";
-
-    console.log("[API] Calling NLP endpoint:", nlpEndpoint);
-    console.log("[API] Query:", message);
+      process.env.NLP_AGENT_URL || "http://localhost:3001/query";
 
     const nlpResponse = await fetch(nlpEndpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         query: message,
+        wallet: stats.wallet,
       }),
-      timeout: 30000, // 30 second timeout
     });
 
-    console.log("[API] NLP response status:", nlpResponse.status);
+    if (!nlpResponse.ok) {
+      throw new Error(`NLP Agent error: ${nlpResponse.status}`);
+    }
 
     const nlpData = await nlpResponse.json();
-    console.log("[API] NLP response data:", nlpData);
-
-    if (!nlpResponse.ok) {
-      // Even if status is not ok, check if we have an error message
-      if (nlpData.error) {
-        return NextResponse.json(
-          {
-            reply: `I couldn't understand that query. Try asking about: "Who is my biggest whale?", "What's my total volume?", or "How many unique collectors do I have?"`,
-          },
-          { status: 200 }
-        );
-      }
-      throw new Error(`NLP Agent returned ${nlpResponse.status}`);
-    }
 
     // Handle NLP agent response
     if (nlpData.error) {
@@ -94,8 +78,7 @@ export async function POST(req: NextRequest) {
       {
         error:
           errorMsg.includes("ECONNREFUSED") ||
-          errorMsg.includes("fetch failed") ||
-          errorMsg.includes("ERR_INVALID_URL")
+          errorMsg.includes("fetch failed")
             ? "NLP service unavailable. Please try again."
             : errorMsg,
       },
