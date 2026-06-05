@@ -23,7 +23,7 @@ type CustomTooltipProps = {
 function formatDateToMonth(dateStr: string): string {
   try {
     const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+    return date.toLocaleDateString("en-US", { month: "short" });
   } catch {
     return dateStr;
   }
@@ -71,6 +71,15 @@ export default function RevenueChart({ data }: Props) {
     ...point,
     displayDate: formatDateToMonth(point.date),
   }));
+
+  // Calculate interval to show only unique months
+  const monthChanges = [0]; // Always show first
+  for (let i = 1; i < processedData.length; i++) {
+    if (processedData[i].displayDate !== processedData[i - 1].displayDate) {
+      monthChanges.push(i);
+    }
+  }
+  const interval = Math.max(1, Math.floor(processedData.length / (monthChanges.length + 1)));
 
   return (
     <div
@@ -134,6 +143,7 @@ export default function RevenueChart({ data }: Props) {
 
             <XAxis
               dataKey="displayDate"
+              interval={interval}
               tick={{
                 fontFamily: "var(--f-mono)",
                 fontSize: 10,
