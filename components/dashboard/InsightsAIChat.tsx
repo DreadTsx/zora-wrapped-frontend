@@ -57,10 +57,16 @@ export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
         }),
       });
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || `HTTP ${res.status} - Please try again`
+        );
+      }
 
       const data = await res.json();
-      if (data.error) throw new Error(data.error); // server sends real error message now
+      if (data.error) throw new Error(data.error);
+      if (!data.reply) throw new Error("No response from AI");
 
       setMsgs((prev) => [...prev, { role: "ai", text: data.reply }]);
     } catch (err) {
