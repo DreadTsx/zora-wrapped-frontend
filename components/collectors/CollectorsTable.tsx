@@ -143,7 +143,7 @@ export default function CollectorsTable({
                     color: "#e5e2e1",
                   }}
                 >
-                  {c.coinsHeld.toLocaleString()}
+                  {c.coins_held.toLocaleString()}
                 </span>
               </td>
 
@@ -156,7 +156,7 @@ export default function CollectorsTable({
                     color: "#9f8e7a88",
                   }}
                 >
-                  {c.firstPurchase}
+                  {c.first_purchase}
                 </span>
               </td>
 
@@ -169,7 +169,7 @@ export default function CollectorsTable({
                     color: "#e5e2e1",
                   }}
                 >
-                  {format(c.totalSpentETH)}
+                  {format(c.total_spent_eth)}
                 </span>
               </td>
 
