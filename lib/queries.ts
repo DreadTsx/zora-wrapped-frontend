@@ -10,9 +10,6 @@ import {
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 //! NLP Agent
-// Connects to POST /query on the Rust backend.
-// Accepts any natural language query containing a wallet address.
-// e.g. "How many holders in 0x..." or "Show top 5 buyers of 0x..."
 
 export async function askAgent(
   query: string,
@@ -43,33 +40,6 @@ export async function askAgent(
     return { error: "Could not reach the agent. Is it running on port 3001?" };
   }
 }
-
-//! STATIC fetch (I need to delete these when API is ready)
-
-// async function fetchCreatorStatsStatic(_wallet: string): Promise<CreatorStats> {
-//   await new Promise((r) => setTimeout(r, 400)); // simulate network
-//   return STATIC_CREATOR;
-// }
-
-// async function fetchVolumeDataStatic(_wallet: string): Promise<VolumePoint[]> {
-//   await new Promise((r) => setTimeout(r, 600));
-//   return STATIC_VOLUME_DATA;
-// }
-
-// async function fetchTopBuyersStatic(_wallet: string): Promise<TopBuyer[]> {
-//   await new Promise((r) => setTimeout(r, 500));
-//   return STATIC_TOP_BUYERS;
-// }
-
-// async function fetchCollectorsStatic(_wallet: string): Promise<Collector[]> {
-//   await new Promise((r) => setTimeout(r, 500));
-//   return STATIC_COLLECTORS;
-// }
-
-// async function fetchCollectionsStatic(_wallet: string): Promise<Collection[]> {
-//   await new Promise((r) => setTimeout(r, 500));
-//   return STATIC_COLLECTIONS;
-// }
 
 //* PRODUCTION fetch ( I need to uncomment when thee API is ready)
 
@@ -123,7 +93,7 @@ export function useVolumeData(wallet: string) {
 export function useTopBuyers(wallet: string) {
   return useQuery<TopBuyer[]>({
     queryKey: ["topBuyers", wallet],
-    queryFn: () => fetchTopBuyers(wallet), //!swap to fetchTopBuyers(wallet)
+    queryFn: () => fetchTopBuyers(wallet),
     enabled: !!wallet,
   });
 }
@@ -131,7 +101,7 @@ export function useTopBuyers(wallet: string) {
 export function useCollectors(wallet: string) {
   return useQuery<Collector[]>({
     queryKey: ["collectors", wallet],
-    queryFn: () => fetchCollectors(wallet), //!swap to fetchCollectors(wallet)
+    queryFn: () => fetchCollectors(wallet),
     enabled: !!wallet,
   });
 }
@@ -139,7 +109,7 @@ export function useCollectors(wallet: string) {
 export function useCollections(wallet: string) {
   return useQuery<Collection[]>({
     queryKey: ["collections", wallet],
-    queryFn: () => fetchCollections(wallet), //!swap to fetchCollections(wallet)
+    queryFn: () => fetchCollections(wallet),
     enabled: !!wallet,
   });
 }

@@ -6,6 +6,8 @@ import type { CreatorStats } from "@/lib/zora";
 
 type Msg = { role: "user" | "ai"; text: string };
 
+// These exact strings are what gets sent to the API and matched in route.ts
+// → buildBackendQuery(). Keep them in sync if you rename.
 const CHIPS = [
   "Who is my biggest whale?",
   "What is my total volume?",
@@ -52,7 +54,6 @@ export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
         body: JSON.stringify({
           message: text.trim(),
           stats,
-          // Pass conversation history for context (exclude the system greeting)
           history: msgs.slice(1),
         }),
       });
@@ -60,7 +61,7 @@ export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const data = await res.json();
-      if (data.error) throw new Error(data.error); // server sends real error message now
+      if (data.error) throw new Error(data.error);
 
       setMsgs((prev) => [...prev, { role: "ai", text: data.reply }]);
     } catch (err) {
@@ -68,7 +69,7 @@ export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
       const errMsg =
         err instanceof Error ? err.message : "Something went wrong. Try again.";
       setError(errMsg);
-      // Restore the user message so they can retry
+      // Restore user message so they can retry
       setMsgs((prev) => prev.slice(0, -1));
       setInput(text.trim());
     } finally {
@@ -86,7 +87,7 @@ export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
         border: "1px solid #2a2a2a",
       }}
     >
-      {/*  Header  */}
+      {/* Header */}
       <div
         style={{
           display: "flex",
@@ -108,7 +109,6 @@ export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
         >
           Insights AI
         </span>
-        {/* Live indicator */}
         <div
           style={{
             marginLeft: "auto",
@@ -140,7 +140,7 @@ export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
         </div>
       </div>
 
-      {/* Suggested chips  */}
+      {/* Suggested chips */}
       <div
         style={{
           display: "flex",
@@ -185,7 +185,7 @@ export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
         ))}
       </div>
 
-      {/*  Messages  */}
+      {/* Messages */}
       <div
         style={{
           flex: 1,
@@ -215,6 +215,7 @@ export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
                 background: m.role === "user" ? "#1c1b1b" : "transparent",
                 border: m.role === "user" ? "1px solid #2a2a2a" : "none",
                 padding: m.role === "user" ? "10px 14px" : "0",
+                whiteSpace: "pre-line", // preserves newlines in backend responses like TopBuyers
               }}
             >
               {m.text}
@@ -300,7 +301,7 @@ export default function InsightsAIChat({ stats }: { stats: CreatorStats }) {
         <div ref={bottomRef} />
       </div>
 
-      {/*  Input  */}
+      {/* Input */}
       <div
         style={{
           display: "flex",
