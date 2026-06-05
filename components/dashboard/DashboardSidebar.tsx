@@ -2,19 +2,12 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import {
-  LayoutDashboard,
-  Library,
-  Users,
-  // TrendingUp,
-  Settings,
-} from "lucide-react";
+import { LayoutDashboard, Library, Users, Settings } from "lucide-react";
 
 const NAV = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Collections", href: "/dashboard/collections", icon: Library },
   { label: "Collectors", href: "/dashboard/collectors", icon: Users },
-  // { label: "Insights", href: "/dashboard/insights", icon: TrendingUp },
   { label: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 

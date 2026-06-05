@@ -100,7 +100,7 @@ export default function DashboardClient() {
         </div>
 
         {/* Chart */}
-        <VolumeChart />
+        <VolumeChart data={growth} />
 
         {/* Top buyers */}
         <TopBuyersList buyers={buyers} />

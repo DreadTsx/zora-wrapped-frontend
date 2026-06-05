@@ -1,17 +1,7 @@
 "use client";
-
-//! STATIC DATA
-const STATIC_VOLUME: { date: string; volume: number }[] = [
-  { date: "Jan", volume: 4.2 },
-  { date: "Feb", volume: 7.8 },
-  { date: "Mar", volume: 6.1 },
-  { date: "Apr", volume: 11.4 },
-  { date: "May", volume: 8.9 },
-  { date: "Jun", volume: 15.3 },
-];
-
-//! PRODUCTION:
-// interface Props { data: { date: string; volume: number }[] }
+interface Props {
+  data: { date: string; volume: number }[];
+}
 
 import {
   AreaChart,
@@ -66,12 +56,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   );
 }
 
-//! PRODUCTION
-// export default function RevenueChart({ data }: Props) {
-export default function RevenueChart() {
-  //!STATIC
-  const data = STATIC_VOLUME;
-
+export default function RevenueChart({ data }: Props) {
   return (
     <div
       style={{

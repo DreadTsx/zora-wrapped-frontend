@@ -18,17 +18,17 @@ export default function WalletInput() {
     const trimmed = value.trim();
 
     //! TODO: I need to uncomment the real validation when backend is ready
-    // if (!isAddress(trimmed)) {
-    //   setError(true);
-    //   inputRef.current?.focus();
-    //   return;
-    // }
+    if (!isAddress(trimmed)) {
+      setError(true);
+      inputRef.current?.focus();
+      return;
+    }
 
-    // router.push(`/dashboard?wallet=${trimmed}`);
+    router.push(`/dashboard?wallet=${trimmed}`);
 
     //! I need to delete these two lines when the backend is ready
-    const wallet = trimmed || "0x1234567890abcdef1234567890abcdef12345678";
-    router.push(`/dashboard?wallet=${wallet}`);
+    // const wallet = trimmed || "0x1234567890abcdef1234567890abcdef12345678";
+    // router.push(`/dashboard?wallet=${wallet}`);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

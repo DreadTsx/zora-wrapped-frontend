@@ -6,7 +6,7 @@ import { Copy, LogOut, Download, Users } from "lucide-react";
 import Toggle from "./Toggle";
 import SettingsSection from "./SettingsSection";
 import { useCurrency } from "@/providers/CurrencyProvider";
-import { STATIC_COLLECTORS, STATIC_COLLECTIONS } from "@/lib/zora";
+import { getCollections, getCollectors } from "@/lib/zora";
 
 //Types
 type Currency = "ETH" | "USD";
@@ -39,9 +39,10 @@ function downloadCSV(filename: string, rows: string[][], headers: string[]) {
   URL.revokeObjectURL(url);
 }
 
-function exportAnalytics() {
+async function exportAnalytics(wallet: string) {
   const headers = ["Collection", "Price (ETH)", "Volume (ETH)", "Holders"];
-  const rows = STATIC_COLLECTIONS.map((c) => [
+  const data = await getCollections(wallet);
+  const rows = data.map((c) => [
     c.name,
     String(c.priceETH),
     String(c.volumeETH),
@@ -50,7 +51,7 @@ function exportAnalytics() {
   downloadCSV("zora-wrapped-analytics.csv", rows, headers);
 }
 
-function exportCollectors() {
+async function exportCollectors(wallet: string) {
   const headers = [
     "Rank",
     "Wallet",
@@ -59,7 +60,8 @@ function exportCollectors() {
     "Total Spent (ETH)",
     "Badge",
   ];
-  const rows = STATIC_COLLECTORS.map((c) => [
+  const data = await getCollectors(wallet);
+  const rows = data.map((c) => [
     String(c.rank),
     c.wallet,
     String(c.coinsHeld),
@@ -592,7 +594,7 @@ export default function SettingsClient() {
             desc="Includes all historical mints and transfers."
             right={
               <button
-                onClick={exportAnalytics}
+                onClick={() => exportAnalytics(wallet)}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -630,7 +632,7 @@ export default function SettingsClient() {
             last
             right={
               <button
-                onClick={exportCollectors}
+                onClick={() => exportCollectors(wallet)}
                 style={{
                   display: "flex",
                   alignItems: "center",
