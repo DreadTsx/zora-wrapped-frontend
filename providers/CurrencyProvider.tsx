@@ -71,16 +71,22 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         return "0.00 ETH";
       }
 
+      // For very small values, show more decimal places to avoid "0.00"
+      let displayDecimals = decimals;
+      if (Math.abs(ethAmount) > 0 && Math.abs(ethAmount) < 0.01) {
+        displayDecimals = 4;
+      }
+
       if (currency === "USD") {
         const usd = ethAmount * ethPrice;
         return new Intl.NumberFormat("en-US", {
           style: "currency",
           currency: "USD",
-          minimumFractionDigits: decimals,
-          maximumFractionDigits: decimals,
+          minimumFractionDigits: displayDecimals,
+          maximumFractionDigits: displayDecimals,
         }).format(usd);
       }
-      return `${ethAmount.toFixed(decimals)} ETH`;
+      return `${ethAmount.toFixed(displayDecimals)} ETH`;
     },
     [currency, ethPrice],
   );

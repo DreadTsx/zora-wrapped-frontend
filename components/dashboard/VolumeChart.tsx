@@ -20,6 +20,15 @@ type CustomTooltipProps = {
   label?: string;
 };
 
+function formatDateToMonth(dateStr: string): string {
+  try {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+  } catch {
+    return dateStr;
+  }
+}
+
 function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   const { format } = useCurrency();
   if (!active || !payload?.length) return null;
@@ -40,7 +49,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
           marginBottom: 4,
         }}
       >
-        {label}
+        {formatDateToMonth(label || "")}
       </p>
       <p
         style={{
@@ -57,6 +66,12 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 }
 
 export default function RevenueChart({ data }: Props) {
+  // Process data to format dates for display
+  const processedData = data.map((point) => ({
+    ...point,
+    displayDate: formatDateToMonth(point.date),
+  }));
+
   return (
     <div
       style={{
@@ -101,7 +116,7 @@ export default function RevenueChart({ data }: Props) {
       <div style={{ height: 240 }}>
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
-            data={data}
+            data={processedData}
             margin={{ top: 4, right: 4, left: -28, bottom: 0 }}
           >
             <defs>
@@ -118,7 +133,7 @@ export default function RevenueChart({ data }: Props) {
             />
 
             <XAxis
-              dataKey="date"
+              dataKey="displayDate"
               tick={{
                 fontFamily: "var(--f-mono)",
                 fontSize: 10,
