@@ -65,7 +65,12 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
   // format(ethAmount) → "1.2 ETH" or "$3,840.00"
   const format = useCallback(
-    (ethAmount: number, decimals = 2): string => {
+    (ethAmount: number | undefined | null, decimals = 2): string => {
+      // Handle undefined or null values
+      if (ethAmount === undefined || ethAmount === null || typeof ethAmount !== "number") {
+        return "0.00 ETH";
+      }
+
       if (currency === "USD") {
         const usd = ethAmount * ethPrice;
         return new Intl.NumberFormat("en-US", {
