@@ -7,7 +7,7 @@ import {
   type Collection,
 } from "./zora";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL;
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 //! NLP Agent
 // Connects to POST /query on the Rust backend.

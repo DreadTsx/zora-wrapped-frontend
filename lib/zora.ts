@@ -41,7 +41,7 @@ export type Collection = {
   thumbnail: string | null;
 };
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL;
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 /*  Static Mock Data*/
 // export const STATIC_CREATOR: CreatorStats = {
