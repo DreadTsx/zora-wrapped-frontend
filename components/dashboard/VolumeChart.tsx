@@ -50,13 +50,7 @@ function formatTooltipDate(dateStr: string): string {
   });
 }
 
-// ─── ETH value formatter ─────────────────────────────────────────────────────
-
-/**
- * Format a small ETH value for display.
- * Values like 0.0000139 → "0.0000140 ETH"
- * Uses toPrecision to avoid trailing zeros while keeping meaningful digits.
- */
+//ETH value formatter
 function formatETH(value: number): string {
   if (value === 0) return "0 ETH";
   if (value >= 1) return `${value.toFixed(4)} ETH`;
@@ -68,7 +62,7 @@ function formatETH(value: number): string {
   return `${cleaned} ETH`;
 }
 
-// ─── Tooltip ─────────────────────────────────────────────────────────────────
+//Tooltip
 
 type CustomTooltipProps = {
   active?: boolean;
@@ -117,7 +111,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
   );
 }
 
-// ─── Y-axis tick formatter ────────────────────────────────────────────────────
+//Y-axis tick formatter
 
 function formatYAxis(value: number): string {
   if (value === 0) return "0";
@@ -128,7 +122,7 @@ function formatYAxis(value: number): string {
   return value.toPrecision(3);
 }
 
-// ─── Main chart ───────────────────────────────────────────────────────────────
+//Main chart
 
 export default function RevenueChart({ data }: Props) {
   if (!data || data.length === 0) {
@@ -157,17 +151,13 @@ export default function RevenueChart({ data }: Props) {
     );
   }
 
-  // Attach rawDate so the tooltip can access the original string directly,
-  // independent of what XAxis transforms it into.
   const processedData = data.map((point) => ({
-    rawDate: point.date, // untouched original — used by tooltip
-    displayDate: formatLabel(point.date), // "May 9" — used by XAxis
+    rawDate: point.date,
+    displayDate: formatLabel(point.date),
     volume: point.volume,
   }));
 
-  // ── Dot visibility strategy ──────────────────────────────────────────────
-  // If all points are within the same month (very common for new coins),
-  // hiding dots keeps the chart clean. We still show the activeDot on hover.
+  //Dot visibility
   const allSameMonth =
     processedData.length > 1 &&
     processedData.every(
@@ -183,8 +173,8 @@ export default function RevenueChart({ data }: Props) {
     Math.floor(processedData.length / MAX_VISIBLE_DOTS),
   );
 
-  // ── X-axis tick strategy ─────────────────────────────────────────────────
-  // Show only a few evenly-spaced labels so they don't overlap
+  // X-axis tick
+
   const MAX_XTICKS = 5;
   const tickInterval = Math.max(
     1,

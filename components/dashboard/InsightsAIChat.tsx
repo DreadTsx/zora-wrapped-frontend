@@ -6,8 +6,6 @@ import type { CreatorStats } from "@/lib/zora";
 
 type Msg = { role: "user" | "ai"; text: string };
 
-// These exact strings are what gets sent to the API and matched in route.ts
-// → buildBackendQuery(). Keep them in sync if you rename.
 const CHIPS = [
   "Who is my biggest whale?",
   "What is my total volume?",

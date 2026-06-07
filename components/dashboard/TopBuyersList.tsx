@@ -1,13 +1,24 @@
 "use client";
 
-import { useCurrency } from "@/providers/CurrencyProvider";
 import type { TopBuyer } from "@/lib/zora";
 
-export default function TopBuyersList({ buyers }: { buyers: TopBuyer[] }) {
-  const { format } = useCurrency();
+function formatCoinAmount(rawAmount: number): string {
+  const coins = rawAmount / 1e18;
 
+  if (coins === 0) return "0 coins";
+
+  if (coins >= 1_000_000) return `${(coins / 1_000_000).toFixed(2)}M coins`;
+  if (coins >= 1_000)
+    return `${coins.toLocaleString("en-US", { maximumFractionDigits: 2 })} coins`;
+  if (coins >= 1) return `${coins.toFixed(4)} coins`;
+
+  return `${parseFloat(coins.toPrecision(4))} coins`;
+}
+
+export default function TopBuyersList({ buyers }: { buyers: TopBuyer[] }) {
   return (
     <div style={{ background: "#141414", border: "1px solid #2a2a2a" }}>
+      {/* Header */}
       <div
         style={{
           display: "flex",
@@ -42,7 +53,9 @@ export default function TopBuyersList({ buyers }: { buyers: TopBuyer[] }) {
 
       {buyers.map((b, i) => {
         const shortWallet = `${b.wallet.slice(0, 6)}...${b.wallet.slice(-4)}`;
-        const roundedPercentage = Math.round(b.percentage * 10) / 10;
+        const roundedPct = Math.round(b.percentage * 10) / 10;
+        const coinLabel = formatCoinAmount(b.amount_eth);
+
         return (
           <div
             key={b.wallet}
@@ -51,7 +64,8 @@ export default function TopBuyersList({ buyers }: { buyers: TopBuyer[] }) {
               alignItems: "center",
               gap: 16,
               padding: "14px 24px",
-              borderBottom: i < buyers.length - 1 ? "1px solid #2a2a2a" : "none",
+              borderBottom:
+                i < buyers.length - 1 ? "1px solid #2a2a2a" : "none",
               transition: "background 0.15s",
               cursor: "default",
             }}
@@ -60,6 +74,7 @@ export default function TopBuyersList({ buyers }: { buyers: TopBuyer[] }) {
               (e.currentTarget.style.background = "transparent")
             }
           >
+            {/* Rank */}
             <span
               style={{
                 fontFamily: "var(--f-mono)",
@@ -71,6 +86,8 @@ export default function TopBuyersList({ buyers }: { buyers: TopBuyer[] }) {
             >
               {String(b.rank).padStart(2, "0")}
             </span>
+
+            {/* Wallet */}
             <span
               style={{
                 fontFamily: "var(--f-mono)",
@@ -82,12 +99,15 @@ export default function TopBuyersList({ buyers }: { buyers: TopBuyer[] }) {
             >
               {shortWallet}
             </span>
+
+            {/* Progress bar */}
             <div
               style={{
                 flex: 1,
                 height: 1,
                 background: "#2a2a2a",
                 position: "relative",
+                minWidth: 0,
               }}
             >
               <div
@@ -96,36 +116,42 @@ export default function TopBuyersList({ buyers }: { buyers: TopBuyer[] }) {
                   top: 0,
                   left: 0,
                   height: "100%",
-                  width: `${roundedPercentage}%`,
+                  width: `${Math.min(roundedPct, 100)}%`,
                   background: "#F5A623",
                   opacity: 0.65,
                 }}
               />
             </div>
+
+            {/* Percentage */}
             <span
               style={{
                 fontFamily: "var(--f-mono)",
                 fontSize: 11,
                 color: "#9f8e7a88",
-                width: 36,
+                width: 40,
                 textAlign: "right",
                 flexShrink: 0,
               }}
             >
-              {roundedPercentage}%
+              {roundedPct}%
             </span>
+
             <span
               style={{
                 fontFamily: "var(--f-mono)",
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: 700,
                 color: "#F5A623",
-                width: 90,
+                width: 120,
                 textAlign: "right",
                 flexShrink: 0,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
             >
-              {format(b.amount_eth)}
+              {coinLabel}
             </span>
           </div>
         );

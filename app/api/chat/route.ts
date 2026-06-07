@@ -10,19 +10,29 @@ interface ChatRequest {
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL ?? "https://zora-wrapped-back.onrender.com";
 
-// Shortens any 0x address to  0x1234...abcd
+//Formatting helpers
+
 function shortAddr(addr: string): string {
   if (!addr || addr.length < 10) return addr;
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 }
 
-// Zora coin amounts come back as raw 18-decimal token units (wei-scale).
-// e.g. 2.28e+21 → 2.28
-function fromWei(amount: number): number {
-  return amount / 1e18;
+function formatCoinAmount(rawAmount: number): string {
+  const coins = rawAmount / 1e18;
+  if (coins === 0) return "0 coins";
+  if (coins >= 1_000_000) return `${(coins / 1_000_000).toFixed(2)}M coins`;
+  if (coins >= 1_000)
+    return `${coins.toLocaleString("en-US", { maximumFractionDigits: 2 })} coins`;
+  if (coins >= 1) return `${coins.toFixed(4)} coins`;
+  return `${parseFloat(coins.toPrecision(4))} coins`;
 }
 
-// ─── REST helpers (use FrontendService which resolves wallet → coin internally) ───
+function formatEthVolume(value: number): string {
+  if (value === 0) return "0 ETH";
+  if (value >= 1) return `${value.toFixed(4)} ETH`;
+  if (value < 0.000001) return `${value.toExponential(3)} ETH`;
+  return `${parseFloat(value.toPrecision(4))} ETH`;
+}
 
 async function fetchTopBuyers(wallet: string): Promise<string> {
   const res = await fetch(
@@ -41,12 +51,9 @@ async function fetchTopBuyers(wallet: string): Promise<string> {
 
   const lines = buyers.map(
     (b) =>
-      `#${b.rank}  ${shortAddr(b.wallet)}  —  ${b.percentage.toFixed(1)}%  (${fromWei(b.amount_eth).toFixed(2)} coins)`,
+      `#${b.rank}  ${shortAddr(b.wallet)}  —  ${(Math.round(b.percentage * 10) / 10).toFixed(1)}%  (${formatCoinAmount(b.amount_eth)})`,
   );
-  console.log(
-    "[debug] raw amount_eth:",
-    buyers.map((b) => b.amount_eth),
-  );
+
   return `Top buyers:\n${lines.join("\n")}`;
 }
 
@@ -55,7 +62,7 @@ async function fetchVolume(wallet: string): Promise<string> {
   if (!res.ok) throw new Error(`creator-stats: ${res.status}`);
 
   const stats: CreatorStats = await res.json();
-  return `Total volume: ${stats.volume_eth.toFixed(2)} ETH across all coins.`;
+  return `Total volume: ${formatEthVolume(stats.volume_eth)} across all coins.`;
 }
 
 async function fetchHolderCount(wallet: string): Promise<string> {
@@ -65,8 +72,6 @@ async function fetchHolderCount(wallet: string): Promise<string> {
   const stats: CreatorStats = await res.json();
   return `Unique collectors: ${stats.unique_holders.toLocaleString()}`;
 }
-
-// ─── Intent router ────────────────────────────────────────────────────────────
 
 type IntentFn = (wallet: string) => Promise<string>;
 
@@ -102,8 +107,6 @@ function matchIntent(message: string): IntentFn | null {
   return null;
 }
 
-// ─── Fallback: NLP /query endpoint (coin address already resolved above) ──────
-
 async function askNlp(message: string, wallet: string): Promise<string> {
   const nlpEndpoint =
     process.env.NLP_AGENT_URL ?? "https://zora-wrapped-back.onrender.com/query";
@@ -126,11 +129,9 @@ async function askNlp(message: string, wallet: string): Promise<string> {
   if (!nlpResponse.ok) throw new Error(`NLP Agent: ${nlpResponse.status}`);
 
   const data = await nlpResponse.json();
-  if (data.error) return ""; // signal to use fallback message
+  if (data.error) return "";
   return data.result ?? "";
 }
-
-// ─── Handler ─────────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
   try {
@@ -153,14 +154,14 @@ export async function POST(req: NextRequest) {
     const wallet = stats.wallet;
     console.log("[chat] message:", message, "| wallet:", wallet);
 
-    // 1. Try a known intent → call REST directly (wallet→coin resolved server-side)
+    // 1. Known intent → call REST directly
     const intentFn = matchIntent(message);
     if (intentFn) {
       const reply = await intentFn(wallet);
       return NextResponse.json({ reply });
     }
 
-    // 2. Unknown intent → try the NLP endpoint
+    // 2. Unknown intent → try NLP endpoint
     const nlpReply = await askNlp(message, wallet);
     if (nlpReply) {
       return NextResponse.json({ reply: nlpReply });
