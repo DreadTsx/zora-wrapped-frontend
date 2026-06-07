@@ -1,78 +1,220 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
+import { X } from "lucide-react";
 import { useCurrency } from "@/providers/CurrencyProvider";
 import type { Collection } from "@/lib/zora";
 
-/* Unique gradient per card */
-const THUMBNAILS: Record<string, string> = {
-  "1": "linear-gradient(135deg, #1a1a1a 0%, #2a2420 40%, #1c1510 100%)",
-  "2": "linear-gradient(160deg, #0e0e0e 0%, #1a1208 50%, #2a1f00 100%)",
-  "3": "linear-gradient(120deg, #131313 0%, #1c1c14 45%, #24200a 100%)",
-  "4": "linear-gradient(145deg, #0e0e0e 0%, #1a1410 60%, #201a10 100%)",
-  "5": "linear-gradient(155deg, #131313 0%, #181410 50%, #201c14 100%)",
-  "6": "linear-gradient(130deg, #0e0e0e 0%, #1e1800 55%, #2a2000 100%)",
-};
-
-/* Subtle SVG pattern overlay on thumbnail */
-function ThumbnailPattern({ id }: { id: string }) {
-  const grad = THUMBNAILS[id] ?? THUMBNAILS["1"];
+function Lightbox({
+  src,
+  name,
+  onClose,
+}: {
+  src: string;
+  name: string;
+  onClose: () => void;
+}) {
   return (
     <div
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 1000,
+        background: "rgba(0,0,0,0.88)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 24,
+        backdropFilter: "blur(4px)",
+        WebkitBackdropFilter: "blur(4px)",
+      }}
+    >
+      <button
+        onClick={onClose}
+        style={{
+          position: "absolute",
+          top: 20,
+          right: 20,
+          background: "#141414",
+          border: "1px solid #2a2a2a",
+          color: "#9f8e7a",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 36,
+          height: 36,
+          zIndex: 1001,
+        }}
+      >
+        <X size={16} strokeWidth={1.5} />
+      </button>
+
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          position: "relative",
+          maxWidth: "min(680px, 90vw)",
+          maxHeight: "80vh",
+          width: "100%",
+          aspectRatio: "1 / 1",
+          border: "1px solid #2a2a2a",
+          overflow: "hidden",
+        }}
+      >
+        <Image
+          src={src}
+          alt={name}
+          fill
+          sizes="680px"
+          style={{ objectFit: "contain" }}
+          unoptimized
+        />
+      </div>
+
+      <div
+        style={{
+          position: "absolute",
+          bottom: 32,
+          left: "50%",
+          transform: "translateX(-50%)",
+          fontFamily: "var(--f-serif)",
+          fontSize: 16,
+          color: "#e5e2e1",
+          whiteSpace: "nowrap",
+          maxWidth: "80vw",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+      >
+        {name}
+      </div>
+    </div>
+  );
+}
+
+function Thumbnail({
+  src,
+  name,
+  onClick,
+}: {
+  src: string | null;
+  name: string;
+  onClick: () => void;
+}) {
+  const [loaded, setLoaded] = useState(false);
+  const [errored, setErrored] = useState(false);
+
+  // Fallback image
+  if (!src || errored) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          background:
+            "linear-gradient(135deg, #1a1a1a 0%, #2a2420 40%, #1c1510 100%)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <span
+          style={{
+            fontFamily: "var(--f-mono)",
+            fontSize: 10,
+            color: "#9f8e7a33",
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+          }}
+        >
+          No image
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      onClick={onClick}
       style={{
         position: "relative",
         width: "100%",
         height: "100%",
-        background: grad,
+        cursor: "zoom-in",
         overflow: "hidden",
       }}
     >
-      {/* Diagonal grain lines */}
-      <svg
+      {/* Shimmer while the images are loading */}
+      {!loaded && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(90deg,#1c1b1b 25%,#2a2a2a 50%,#1c1b1b 75%)",
+            backgroundSize: "200% 100%",
+            animation: "thumbShimmer 1.4s infinite",
+            zIndex: 1,
+          }}
+        />
+      )}
+
+      <Image
+        src={src}
+        alt={name}
+        fill
+        sizes="(max-width: 767px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        style={{
+          objectFit: "cover",
+          transition: "transform 0.3s ease",
+          transform: "scale(1)",
+        }}
+        unoptimized
+        onLoad={() => setLoaded(true)}
+        onError={() => setErrored(true)}
+        onMouseEnter={(e) =>
+          ((e.currentTarget as HTMLImageElement).style.transform =
+            "scale(1.04)")
+        }
+        onMouseLeave={(e) =>
+          ((e.currentTarget as HTMLImageElement).style.transform = "scale(1)")
+        }
+      />
+
+      {/* Expand the image */}
+      <div
+        className="thumb-hint"
         style={{
           position: "absolute",
           inset: 0,
-          width: "100%",
-          height: "100%",
-          opacity: 0.07,
+          background: "rgba(0,0,0,0)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          transition: "background 0.2s",
+          zIndex: 2,
         }}
-        xmlns="http://www.w3.org/2000/svg"
       >
-        <defs>
-          <pattern
-            id={`p-${id}`}
-            x="0"
-            y="0"
-            width="40"
-            height="40"
-            patternUnits="userSpaceOnUse"
-          >
-            <line
-              x1="0"
-              y1="40"
-              x2="40"
-              y2="0"
-              stroke="#F5A623"
-              strokeWidth="0.5"
-            />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill={`url(#p-${id})`} />
-      </svg>
-      {/* Amber glow in corner */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: -20,
-          right: -20,
-          width: 120,
-          height: 120,
-          background:
-            "radial-gradient(circle, rgba(245,166,35,0.12) 0%, transparent 70%)",
-          filter: "blur(20px)",
-          pointerEvents: "none",
-        }}
-      />
+        <span
+          className="thumb-hint-label"
+          style={{
+            fontFamily: "var(--f-mono)",
+            fontSize: 9,
+            textTransform: "uppercase",
+            letterSpacing: "0.14em",
+            color: "#fff",
+            background: "rgba(0,0,0,0.55)",
+            padding: "5px 10px",
+            opacity: 0,
+            transition: "opacity 0.2s",
+          }}
+        >
+          View full
+        </span>
+      </div>
     </div>
   );
 }
@@ -85,150 +227,169 @@ export default function CollectionCard({
   index: number;
 }) {
   const [hovered, setHovered] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const { format } = useCurrency();
 
   return (
-    <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        background: "#141414",
-        border: `1px solid ${hovered ? "#F5A623" : "#2a2a2a"}`,
-        display: "flex",
-        flexDirection: "column",
-        transition: "border-color 0.2s ease",
-        opacity: 0,
-        animation: "cardIn 0.5s cubic-bezier(0.22,1,0.36,1) forwards",
-        animationDelay: `${index * 80}ms`,
-      }}
-    >
-      {/*  Thumbnail  */}
-      {/* For Desktop */}
-      <div
-        className="card-thumb-desktop"
-        style={{ height: 180, flexShrink: 0, overflow: "hidden" }}
-      >
-        <ThumbnailPattern id={collection.id} />
-      </div>
-      {/* For Mobile */}
-      <div
-        className="card-thumb-mobile"
-        style={{ height: 200, flexShrink: 0, overflow: "hidden" }}
-      >
-        <ThumbnailPattern id={collection.id} />
-      </div>
+    <>
+      {lightboxOpen && collection.thumbnail && (
+        <Lightbox
+          src={collection.thumbnail}
+          name={collection.name}
+          onClose={() => setLightboxOpen(false)}
+        />
+      )}
 
-      {/* Card body */}
       <div
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         style={{
-          padding: "18px 20px 20px",
+          background: "#141414",
+          border: `1px solid ${hovered ? "#F5A623" : "#2a2a2a"}`,
           display: "flex",
           flexDirection: "column",
-          flex: 1,
+          transition: "border-color 0.2s ease",
+          opacity: 0,
+          animation: "cardIn 0.5s cubic-bezier(0.22,1,0.36,1) forwards",
+          animationDelay: `${index * 80}ms`,
         }}
       >
-        {/* Name */}
-        <h3
-          style={{
-            fontFamily: "var(--f-serif)",
-            fontWeight: 700,
-            fontSize: 22,
-            color: "#e5e2e1",
-            lineHeight: 1.1,
-            marginBottom: 6,
-          }}
-        >
-          {collection.name}
-        </h3>
-
-        {/* Amber rule */}
+        {/* Thumbnail*/}
         <div
           style={{
-            width: 32,
-            height: 1,
-            background: "#F5A623",
-            opacity: 0.6,
-            marginBottom: 16,
+            height: 200,
+            flexShrink: 0,
+            overflow: "hidden",
+            position: "relative",
           }}
-        />
-
-        {/* Stats */}
-        <div
-          style={{ display: "flex", flexDirection: "column", gap: 0, flex: 1 }}
         >
-          {[
-            {
-              label: "Current Price",
-              value: format(collection.price_eth),
-              amber: true,
-            },
-            {
-              label: "Total Volume",
-              value: format(collection.volume_eth),
-              amber: false,
-            },
-            {
-              label: "Holders",
-              value: collection.holders.toLocaleString(),
-              amber: false,
-            },
-          ].map((row, i, arr) => (
-            <div
-              key={row.label}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "9px 0",
-                borderBottom: i < arr.length - 1 ? "1px solid #2a2a2a" : "none",
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: "var(--f-mono)",
-                  fontSize: 9,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.12em",
-                  color: "#9f8e7a77",
-                }}
-              >
-                {row.label}
-              </span>
-              <span
-                style={{
-                  fontFamily: "var(--f-mono)",
-                  fontSize: 12,
-                  fontWeight: 700,
-                  color: row.amber ? "#F5A623" : "#e5e2e1",
-                  letterSpacing: "0.02em",
-                }}
-              >
-                {row.value}
-              </span>
-            </div>
-          ))}
+          <Thumbnail
+            src={collection.thumbnail}
+            name={collection.name}
+            onClick={() => collection.thumbnail && setLightboxOpen(true)}
+          />
         </div>
 
-        {/* CTA button */}
-        <button
+        {/* Card body */}
+        <div
           style={{
-            marginTop: 18,
-            width: "100%",
-            padding: "11px 0",
-            fontFamily: "var(--f-mono)",
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
-            background: hovered ? "#ffb955" : "#F5A623",
-            color: "#000",
-            border: "none",
-            cursor: "pointer",
-            transition: "background 0.2s ease",
+            padding: "18px 20px 20px",
+            display: "flex",
+            flexDirection: "column",
+            flex: 1,
           }}
         >
-          View Analytics
-        </button>
+          {/* Name */}
+          <h3
+            style={{
+              fontFamily: "var(--f-serif)",
+              fontWeight: 700,
+              fontSize: 20,
+              color: "#e5e2e1",
+              lineHeight: 1.15,
+              marginBottom: 6,
+              // long names wrap instead of overflow
+              wordBreak: "break-word",
+            }}
+          >
+            {collection.name}
+          </h3>
+
+          {/* Amber rule */}
+          <div
+            style={{
+              width: 32,
+              height: 1,
+              background: "#F5A623",
+              opacity: 0.6,
+              marginBottom: 16,
+            }}
+          />
+
+          {/* Stats */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 0,
+              flex: 1,
+            }}
+          >
+            {[
+              {
+                label: "Current Price",
+                value: format(collection.price_eth),
+                amber: true,
+              },
+              {
+                label: "Total Volume",
+                value: format(collection.volume_eth),
+                amber: false,
+              },
+              {
+                label: "Holders",
+                value: collection.holders.toLocaleString(),
+                amber: false,
+              },
+            ].map((row, i, arr) => (
+              <div
+                key={row.label}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "9px 0",
+                  borderBottom:
+                    i < arr.length - 1 ? "1px solid #2a2a2a" : "none",
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: "var(--f-mono)",
+                    fontSize: 9,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.12em",
+                    color: "#9f8e7a77",
+                  }}
+                >
+                  {row.label}
+                </span>
+                <span
+                  style={{
+                    fontFamily: "var(--f-mono)",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: row.amber ? "#F5A623" : "#e5e2e1",
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  {row.value}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <button
+            style={{
+              marginTop: 18,
+              width: "100%",
+              padding: "11px 0",
+              fontFamily: "var(--f-mono)",
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              background: hovered ? "#ffb955" : "#F5A623",
+              color: "#000",
+              border: "none",
+              cursor: "pointer",
+              transition: "background 0.2s ease",
+            }}
+          >
+            View Analytics
+          </button>
+        </div>
       </div>
 
       <style>{`
@@ -236,14 +397,17 @@ export default function CollectionCard({
           from { opacity: 0; transform: translateY(16px); }
           to   { opacity: 1; transform: translateY(0); }
         }
-        /* Desktop: show desktop thumb, hide mobile thumb */
-        .card-thumb-desktop { display: block; }
-        .card-thumb-mobile  { display: none; }
-        @media (max-width: 767px) {
-          .card-thumb-desktop { display: none; }
-          .card-thumb-mobile  { display: block; }
+        @keyframes thumbShimmer {
+          0%   { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+        .thumb-hint:hover {
+          background: rgba(0,0,0,0.28) !important;
+        }
+        .thumb-hint:hover .thumb-hint-label {
+          opacity: 1 !important;
         }
       `}</style>
-    </div>
+    </>
   );
 }
