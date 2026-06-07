@@ -31,13 +31,44 @@ function Badge({ type }: { type: "WHALE" | "FAN" | "NEW" }) {
         letterSpacing: "0.14em",
         textTransform: "uppercase",
         padding: "4px 10px",
-        ...styles[type],
         display: "inline-block",
+        ...styles[type],
       }}
     >
       {type}
     </span>
   );
+}
+
+function formatDate(raw: string): string {
+  if (!raw || raw.trim() === "") return "—";
+
+  const d = new Date(`${raw}T00:00:00Z`);
+  if (isNaN(d.getTime())) return "—";
+
+  const day = d.getUTCDate();
+  const suffix =
+    day === 1 || day === 21 || day === 31
+      ? "st"
+      : day === 2 || day === 22
+        ? "nd"
+        : day === 3 || day === 23
+          ? "rd"
+          : "th";
+
+  const month = d.toLocaleString("en-US", { month: "long", timeZone: "UTC" });
+  const year = d.getUTCFullYear();
+
+  return `${day}${suffix} ${month} ${year}`;
+}
+
+function formatCoins(coins: number): string {
+  if (coins === 0) return "0 coins";
+  if (coins >= 1_000)
+    return `${coins.toLocaleString("en-US", { maximumFractionDigits: 2 })} coins`;
+  if (coins >= 1) return `${coins.toFixed(4)} coins`;
+  // sub-1: 4 significant figures so tiny values remain readable
+  return `${parseFloat(coins.toPrecision(4))} coins`;
 }
 
 const COLS = [
@@ -92,7 +123,6 @@ export default function CollectorsTable({
           </tr>
         </thead>
 
-        {/* Rows */}
         <tbody>
           {collectors.map((c, i) => (
             <tr
@@ -107,7 +137,6 @@ export default function CollectorsTable({
                 cursor: "default",
               }}
             >
-              {/* Rank */}
               <td style={{ padding: "16px 20px" }}>
                 <span
                   style={{
@@ -120,7 +149,6 @@ export default function CollectorsTable({
                 </span>
               </td>
 
-              {/* Wallet */}
               <td style={{ padding: "16px 20px" }}>
                 <span
                   style={{
@@ -134,7 +162,6 @@ export default function CollectorsTable({
                 </span>
               </td>
 
-              {/* Coins held */}
               <td style={{ padding: "16px 20px" }}>
                 <span
                   style={{
@@ -143,24 +170,23 @@ export default function CollectorsTable({
                     color: "#e5e2e1",
                   }}
                 >
-                  {c.coins_held.toLocaleString()}
+                  {formatCoins(c.coins_held)}
                 </span>
               </td>
 
-              {/* First purchase */}
               <td style={{ padding: "16px 20px" }}>
                 <span
                   style={{
                     fontFamily: "var(--f-mono)",
                     fontSize: 12,
                     color: "#9f8e7a88",
+                    whiteSpace: "nowrap",
                   }}
                 >
-                  {c.first_purchase}
+                  {formatDate(c.first_purchase)}
                 </span>
               </td>
 
-              {/* Total spent */}
               <td style={{ padding: "16px 20px" }}>
                 <span
                   style={{
@@ -169,11 +195,10 @@ export default function CollectorsTable({
                     color: "#e5e2e1",
                   }}
                 >
-                  {format(c.total_spent_eth)}
+                  {c.total_spent_eth === 0 ? "—" : format(c.total_spent_eth)}
                 </span>
               </td>
 
-              {/* Badge */}
               <td style={{ padding: "16px 20px" }}>
                 <Badge type={c.badge} />
               </td>

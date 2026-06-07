@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Users, Clock, Waves } from "lucide-react";
+import { Users, Waves, Star } from "lucide-react";
 import type { Collector } from "@/lib/zora";
 
 function useCountUp(target: number, duration = 1200, enabled = true) {
   const [val, setVal] = useState(0);
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || target === 0) {
+      return;
+    }
     let start: number | null = null;
     const step = (ts: number) => {
       if (!start) start = ts;
@@ -52,7 +54,6 @@ function DesktopCard({
         transition: "opacity 0.6s ease, transform 0.6s ease",
       }}
     >
-      {/* Header row */}
       <div
         style={{
           display: "flex",
@@ -74,9 +75,7 @@ function DesktopCard({
         </span>
         <Icon size={16} strokeWidth={1.4} style={{ color: "#9f8e7a33" }} />
       </div>
-      {/* Thin rule */}
       <div style={{ height: 1, background: "#2a2a2a", marginBottom: 20 }} />
-      {/* Big number */}
       <div
         style={{
           fontFamily: "var(--f-serif)",
@@ -157,13 +156,14 @@ export default function CollectorSummaryCards({
 }: {
   collectors: Collector[];
 }) {
-  const totalCollectors = collectors.length * 1776; //? mock total
-  const avgHoldDays = 84;
-  const whaleCount = collectors.filter((c) => c.badge === "WHALE").length * 63;
+  // Real derived values — no mock multipliers
+  const totalCollectors = collectors.length;
+  const whaleCount = collectors.filter((c) => c.badge === "WHALE").length;
+  const fanCount = collectors.filter((c) => c.badge === "FAN").length;
 
   return (
     <>
-      {/* Desktop — 3 side-by-side cards */}
+      {/* Desktop */}
       <div className="desktop-only" style={{ gap: 16 }}>
         <DesktopCard
           label="Total Collectors"
@@ -172,34 +172,23 @@ export default function CollectorSummaryCards({
           delay={80}
         />
         <DesktopCard
-          label="Avg. Hold Duration"
-          value={avgHoldDays}
-          suffix="d"
-          icon={Clock}
-          delay={160}
-        />
-        <DesktopCard
-          label="Whale Count"
+          label="Whales"
           value={whaleCount}
           icon={Waves}
-          delay={240}
+          delay={160}
         />
+        <DesktopCard label="Fans" value={fanCount} icon={Star} delay={240} />
       </div>
 
-      {/* Mobile view */}
+      {/* Mobile */}
       <div className="mobile-only" style={{ flexDirection: "column" }}>
         <MobileStat
           label="Total Collectors"
           value={totalCollectors}
           delay={80}
         />
-        <MobileStat
-          label="Avg. Hold Duration"
-          value={avgHoldDays}
-          suffix="d"
-          delay={160}
-        />
-        <MobileStat label="Whale Count" value={whaleCount} delay={240} />
+        <MobileStat label="Whales" value={whaleCount} delay={160} />
+        <MobileStat label="Fans" value={fanCount} delay={240} />
       </div>
     </>
   );

@@ -39,6 +39,31 @@ function Badge({ type }: { type: "WHALE" | "FAN" | "NEW" }) {
   );
 }
 
+function formatDate(raw: string): string {
+  if (!raw || raw.trim() === "") return "—";
+  const d = new Date(`${raw}T00:00:00Z`);
+  if (isNaN(d.getTime())) return "—";
+  const day = d.getUTCDate();
+  const suffix =
+    day === 1 || day === 21 || day === 31
+      ? "st"
+      : day === 2 || day === 22
+        ? "nd"
+        : day === 3 || day === 23
+          ? "rd"
+          : "th";
+  const month = d.toLocaleString("en-US", { month: "long", timeZone: "UTC" });
+  return `${day}${suffix} ${month} ${d.getUTCFullYear()}`;
+}
+
+function formatCoins(coins: number): string {
+  if (coins === 0) return "0 coins";
+  if (coins >= 1_000)
+    return `${coins.toLocaleString("en-US", { maximumFractionDigits: 2 })} coins`;
+  if (coins >= 1) return `${coins.toFixed(4)} coins`;
+  return `${parseFloat(coins.toPrecision(4))} coins`;
+}
+
 export default function CollectorMobileCard({
   collector,
   index,
@@ -47,6 +72,7 @@ export default function CollectorMobileCard({
   index: number;
 }) {
   const { format } = useCurrency();
+
   return (
     <div
       style={{
@@ -58,7 +84,6 @@ export default function CollectorMobileCard({
         animationDelay: `${index * 60}ms`,
       }}
     >
-      {/* Top row:rank and badge */}
       <div
         style={{
           display: "flex",
@@ -80,7 +105,6 @@ export default function CollectorMobileCard({
         <Badge type={collector.badge} />
       </div>
 
-      {/* Wallet address(large)*/}
       <div
         style={{
           fontFamily: "var(--f-mono)",
@@ -118,14 +142,15 @@ export default function CollectorMobileCard({
           <p
             style={{
               fontFamily: "var(--f-mono)",
-              fontSize: 14,
+              fontSize: 13,
               fontWeight: 700,
               color: "#e5e2e1",
             }}
           >
-            {collector.coins_held.toLocaleString()}
+            {formatCoins(collector.coins_held)}
           </p>
         </div>
+
         <div>
           <p
             style={{
@@ -142,12 +167,38 @@ export default function CollectorMobileCard({
           <p
             style={{
               fontFamily: "var(--f-mono)",
-              fontSize: 14,
+              fontSize: 13,
               fontWeight: 700,
               color: "#e5e2e1",
             }}
           >
-            {format(collector.total_spent_eth)}
+            {collector.total_spent_eth === 0
+              ? "—"
+              : format(collector.total_spent_eth)}
+          </p>
+        </div>
+
+        <div style={{ gridColumn: "1 / -1", marginTop: 4 }}>
+          <p
+            style={{
+              fontFamily: "var(--f-mono)",
+              fontSize: 9,
+              textTransform: "uppercase",
+              letterSpacing: "0.12em",
+              color: "#9f8e7a66",
+              marginBottom: 4,
+            }}
+          >
+            First Purchase
+          </p>
+          <p
+            style={{
+              fontFamily: "var(--f-mono)",
+              fontSize: 12,
+              color: "#9f8e7a88",
+            }}
+          >
+            {formatDate(collector.first_purchase)}
           </p>
         </div>
       </div>
