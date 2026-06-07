@@ -13,33 +13,20 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useCurrency } from "@/providers/CurrencyProvider";
 
-// ─── Date helpers ────────────────────────────────────────────────────────────
-
-/**
- * Safely parse an ISO timestamp string (with or without timezone offset).
- * Returns null if the string is unparseable.
- */
 function parseDate(dateStr: string): Date | null {
   if (!dateStr) return null;
   const d = new Date(dateStr);
   return isNaN(d.getTime()) ? null : d;
 }
 
-/**
- * Format a raw date string into "May 9" style label.
- * Falls back to the raw string if parsing fails.
- */
 function formatLabel(dateStr: string): string {
   const d = parseDate(dateStr);
   if (!d) return dateStr;
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-/**
- * Format a raw date string into a full readable label for the tooltip.
- * e.g. "May 9, 2026 · 06:55 UTC"
- */
 function formatTooltipDate(dateStr: string): string {
   const d = parseDate(dateStr);
   if (!d) return "Unknown date";
@@ -50,31 +37,66 @@ function formatTooltipDate(dateStr: string): string {
   });
 }
 
-//ETH value formatter
-function formatETH(value: number): string {
+function formatETHValue(value: number): string {
   if (value === 0) return "0 ETH";
   if (value >= 1) return `${value.toFixed(4)} ETH`;
-  // For very small values, use enough significant figures
   const precision = value < 0.0001 ? 4 : 6;
-  const str = value.toPrecision(precision);
-  // Remove trailing zeros after decimal
-  const cleaned = parseFloat(str).toString();
-  return `${cleaned} ETH`;
+  return `${parseFloat(value.toPrecision(precision))} ETH`;
 }
 
-//Tooltip
+function formatUSDValue(value: number): string {
+  if (value < 0.01) {
+    return `$${value.toFixed(6)}`;
+  }
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 4,
+  }).format(value);
+}
+
+function makeYAxisFormatter(currency: "ETH" | "USD", ethPrice: number) {
+  return (value: number): string => {
+    if (currency === "USD") {
+      const usd = value * ethPrice;
+      if (usd === 0) return "$0";
+      if (usd >= 1000) return `$${(usd / 1000).toFixed(1)}k`;
+      if (usd >= 1) return `$${usd.toFixed(2)}`;
+      if (usd >= 0.01) return `$${usd.toFixed(4)}`;
+      return `$${usd.toFixed(6)}`;
+    }
+    // ETH
+    if (value === 0) return "0";
+    if (value >= 1) return `${value.toFixed(2)}`;
+    if (value < 0.00001) return `${(value * 1e6).toFixed(1)}μ`;
+    if (value < 0.001) return `${(value * 1000).toFixed(3)}m`;
+    return value.toPrecision(3);
+  };
+}
 
 type CustomTooltipProps = {
   active?: boolean;
   payload?: { value: number; payload: { rawDate: string } }[];
-  label?: string;
+  currency: "ETH" | "USD";
+  ethPrice: number;
 };
 
-function CustomTooltip({ active, payload }: CustomTooltipProps) {
+function CustomTooltip({
+  active,
+  payload,
+  currency,
+  ethPrice,
+}: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
 
   const rawDate = payload[0]?.payload?.rawDate ?? "";
-  const value = payload[0]?.value ?? 0;
+  const ethValue = payload[0]?.value ?? 0;
+
+  const displayValue =
+    currency === "USD"
+      ? formatUSDValue(ethValue * ethPrice)
+      : formatETHValue(ethValue);
 
   return (
     <div
@@ -82,7 +104,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
         background: "#1c1b1b",
         border: "1px solid #2a2a2a",
         padding: "10px 14px",
-        minWidth: 140,
+        minWidth: 150,
       }}
     >
       <p
@@ -105,26 +127,15 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
           color: "#F5A623",
         }}
       >
-        {formatETH(value)}
+        {displayValue}
       </p>
     </div>
   );
 }
 
-//Y-axis tick formatter
-
-function formatYAxis(value: number): string {
-  if (value === 0) return "0";
-  if (value >= 1) return `${value.toFixed(2)}`;
-  // For small numbers, show in scientific-ish notation or short form
-  if (value < 0.00001) return `${(value * 1e6).toFixed(1)}μ`;
-  if (value < 0.001) return `${(value * 1000).toFixed(3)}m`;
-  return value.toPrecision(3);
-}
-
-//Main chart
-
 export default function RevenueChart({ data }: Props) {
+  const { currency, ethPrice } = useCurrency();
+
   if (!data || data.length === 0) {
     return (
       <div
@@ -157,7 +168,7 @@ export default function RevenueChart({ data }: Props) {
     volume: point.volume,
   }));
 
-  //Dot visibility
+  // Dot & tick spacing
   const allSameMonth =
     processedData.length > 1 &&
     processedData.every(
@@ -166,20 +177,19 @@ export default function RevenueChart({ data }: Props) {
         formatLabel(processedData[0].rawDate).split(" ")[0],
     );
 
-  // Show at most one dot every N points to avoid crowding
   const MAX_VISIBLE_DOTS = 6;
   const dotStep = Math.max(
     1,
     Math.floor(processedData.length / MAX_VISIBLE_DOTS),
   );
 
-  // X-axis tick
-
   const MAX_XTICKS = 5;
   const tickInterval = Math.max(
     1,
     Math.floor(processedData.length / MAX_XTICKS),
   );
+
+  const yAxisFormatter = makeYAxisFormatter(currency, ethPrice);
 
   return (
     <div
@@ -217,7 +227,7 @@ export default function RevenueChart({ data }: Props) {
             color: "#9f8e7a55",
           }}
         >
-          All Time
+          {currency === "USD" ? "All Time · USD" : "All Time"}
         </span>
       </div>
 
@@ -241,7 +251,6 @@ export default function RevenueChart({ data }: Props) {
               vertical={false}
             />
 
-            {/* X-axis: use displayDate, spaced out to avoid crowding */}
             <XAxis
               dataKey="displayDate"
               interval={tickInterval}
@@ -255,9 +264,8 @@ export default function RevenueChart({ data }: Props) {
               dy={10}
             />
 
-            {/* Y-axis: custom formatter for tiny ETH values */}
             <YAxis
-              tickFormatter={formatYAxis}
+              tickFormatter={yAxisFormatter}
               tick={{
                 fontFamily: "var(--f-mono)",
                 fontSize: 10,
@@ -265,12 +273,18 @@ export default function RevenueChart({ data }: Props) {
               }}
               axisLine={false}
               tickLine={false}
-              width={60}
+              width={64}
             />
 
-            {/* Tooltip: reads rawDate from payload, formats independently */}
             <Tooltip
-              content={<CustomTooltip />}
+              content={
+                <CustomTooltip
+                  currency={currency}
+                  ethPrice={ethPrice}
+                  // Recharts injects active/payload automatically
+                  {...({} as Pick<CustomTooltipProps, "active" | "payload">)}
+                />
+              }
               cursor={{ stroke: "#2a2a2a", strokeWidth: 1 }}
             />
 
@@ -280,7 +294,6 @@ export default function RevenueChart({ data }: Props) {
               stroke="#F5A623"
               strokeWidth={2}
               fill="url(#revenueGrad)"
-              // Hide dots when same-month cluster, or thin them out otherwise
               dot={
                 allSameMonth
                   ? false
@@ -316,7 +329,6 @@ export default function RevenueChart({ data }: Props) {
         </ResponsiveContainer>
       </div>
 
-      {/* Footer note for same-month data */}
       {allSameMonth && (
         <p
           style={{
