@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { LayoutDashboard, Library, Users, Settings } from "lucide-react";
+import { useCreatorStats } from "@/lib/queries";
 
 const NAV = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -16,9 +18,23 @@ export default function DashboardSidebar() {
   const searchParams = useSearchParams();
   const wallet = searchParams.get("wallet") ?? "";
   const hw = (base: string) => (wallet ? `${base}?wallet=${wallet}` : base);
+
+  const { data: stats } = useCreatorStats(wallet);
+
   const short = wallet
     ? `${wallet.slice(0, 6)}...${wallet.slice(-4)}`
     : "0x1234...5678";
+
+  const displayName = stats?.name || "Zora Creator";
+  const avatarUrl = stats?.avatar ?? null;
+
+  // Initials for the fallback avatar box
+  const initials =
+    displayName
+      .split(/\s+/)
+      .map((w) => w[0]?.toUpperCase() ?? "")
+      .slice(0, 2)
+      .join("") || "ZC";
 
   return (
     <aside
@@ -31,44 +47,73 @@ export default function DashboardSidebar() {
         flexDirection: "column",
       }}
     >
-      {/* Profile */}
       <div
-        style={{ padding: "32px 24px 24px", borderBottom: "1px solid #2a2a2a" }}
+        style={{
+          padding: "32px 24px 24px",
+          borderBottom: "1px solid #2a2a2a",
+        }}
       >
+        {/* Avatar */}
         <div
           style={{
             width: 44,
             height: 44,
             background: "#1c1b1b",
             border: "1px solid #2a2a2a",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
             marginBottom: 16,
+            overflow: "hidden",
+            flexShrink: 0,
+            position: "relative",
           }}
         >
-          <span
-            style={{
-              fontFamily: "var(--f-mono)",
-              fontSize: 11,
-              color: "#9f8e7a",
-            }}
-          >
-            ZC
-          </span>
+          {avatarUrl ? (
+            <Image
+              src={avatarUrl}
+              alt={displayName}
+              fill
+              sizes="44px"
+              style={{ objectFit: "cover" }}
+              unoptimized
+            />
+          ) : (
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "var(--f-mono)",
+                  fontSize: 11,
+                  color: "#9f8e7a",
+                }}
+              >
+                {initials}
+              </span>
+            </div>
+          )}
         </div>
+
+        {/* Name */}
         <div
           style={{
             fontFamily: "var(--f-serif)",
             fontWeight: 700,
-            fontSize: 22,
+            fontSize: 18,
             color: "#e5e2e1",
-            lineHeight: 1.1,
+            lineHeight: 1.2,
             marginBottom: 6,
+            wordBreak: "break-word",
           }}
         >
-          Zora Creator
+          {displayName}
         </div>
+
+        {/* Short wallet */}
         <div
           style={{
             fontFamily: "var(--f-mono)",
@@ -81,7 +126,6 @@ export default function DashboardSidebar() {
         </div>
       </div>
 
-      {/* Nav*/}
       <nav
         style={{
           flex: 1,
@@ -133,15 +177,8 @@ export default function DashboardSidebar() {
         })}
       </nav>
 
-      {/* Wallet address pill */}
       <div style={{ padding: "16px 24px", borderTop: "1px solid #2a2a2a" }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-          }}
-        >
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div
             style={{
               width: 6,

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useCreatorStats, useVolumeData, useTopBuyers } from "@/lib/queries";
 import StatCards from "./StatCards";
@@ -43,9 +44,17 @@ export default function DashboardClient() {
       </div>
     );
 
+  // Avatar initials fallback
+  const initials = stats.name
+    ? stats.name
+        .split(/\s+/)
+        .map((w) => w[0]?.toUpperCase() ?? "")
+        .slice(0, 2)
+        .join("")
+    : "ZC";
+
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
-      {/*LEFT: main content */}
       <div
         className="dash-pad"
         style={{
@@ -56,7 +65,6 @@ export default function DashboardClient() {
           gap: 20,
         }}
       >
-        {/* Page heading */}
         <div
           style={{
             display: "flex",
@@ -66,31 +74,80 @@ export default function DashboardClient() {
             flexWrap: "wrap",
           }}
         >
-          <div>
-            <h1
+          {/* Creator identity */}
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            {/* Avatar */}
+            <div
               style={{
-                fontFamily: "var(--f-serif)",
-                fontWeight: 700,
-                fontSize: "clamp(26px,4vw,42px)",
-                color: "#e5e2e1",
-                lineHeight: 1.1,
+                width: 52,
+                height: 52,
+                background: "#1c1b1b",
+                border: "1px solid #2a2a2a",
+                flexShrink: 0,
+                overflow: "hidden",
+                position: "relative",
               }}
             >
-              Dashboard
-            </h1>
-            <p
-              style={{
-                fontFamily: "var(--f-mono)",
-                fontSize: 10,
-                textTransform: "uppercase",
-                letterSpacing: "0.18em",
-                color: "#9f8e7a55",
-                marginTop: 5,
-              }}
-            >
-              Overview &amp; Analytics
-            </p>
+              {stats.avatar ? (
+                <Image
+                  src={stats.avatar}
+                  alt={stats.name}
+                  fill
+                  sizes="52px"
+                  style={{ objectFit: "cover" }}
+                  unoptimized
+                />
+              ) : (
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "var(--f-mono)",
+                      fontSize: 13,
+                      color: "#9f8e7a",
+                    }}
+                  >
+                    {initials}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Name + label */}
+            <div>
+              <h1
+                style={{
+                  fontFamily: "var(--f-serif)",
+                  fontWeight: 700,
+                  fontSize: "clamp(22px, 3.5vw, 38px)",
+                  color: "#e5e2e1",
+                  lineHeight: 1.1,
+                }}
+              >
+                {stats.name || "Dashboard"}
+              </h1>
+              <p
+                style={{
+                  fontFamily: "var(--f-mono)",
+                  fontSize: 10,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.18em",
+                  color: "#9f8e7a55",
+                  marginTop: 5,
+                }}
+              >
+                Overview &amp; Analytics
+              </p>
+            </div>
           </div>
+
           <ShareCardModal stats={stats} />
         </div>
 
@@ -111,7 +168,6 @@ export default function DashboardClient() {
         </div>
       </div>
 
-      {/* RIGHT: AI chat sidebar (desktop only)*/}
       <div
         className="desktop-only"
         style={{
