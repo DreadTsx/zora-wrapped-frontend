@@ -181,7 +181,7 @@ export default function ShareCardModal({ stats }: { stats: CreatorStats }) {
                       letterSpacing: "0.08em",
                     }}
                   >
-                    2024
+                    {new Date().getFullYear()}
                   </span>
                 </div>
 
