@@ -175,31 +175,6 @@ export default function CollectorsTable({
               </td>
 
               <td style={{ padding: "16px 20px" }}>
-                <span
-                  style={{
-                    fontFamily: "var(--f-mono)",
-                    fontSize: 12,
-                    color: "#9f8e7a88",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {formatDate(c.first_purchase)}
-                </span>
-              </td>
-
-              <td style={{ padding: "16px 20px" }}>
-                <span
-                  style={{
-                    fontFamily: "var(--f-mono)",
-                    fontSize: 13,
-                    color: "#e5e2e1",
-                  }}
-                >
-                  {c.total_spent_eth === 0 ? "—" : format(c.total_spent_eth)}
-                </span>
-              </td>
-
-              <td style={{ padding: "16px 20px" }}>
                 <Badge type={c.badge} />
               </td>
             </tr>
