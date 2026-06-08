@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useCurrency } from "@/providers/CurrencyProvider";
 import type { Collector } from "@/lib/zora";
 
 function Badge({ type }: { type: "WHALE" | "FAN" | "NEW" }) {
@@ -49,14 +48,7 @@ function formatCoins(coins: number): string {
   return `${parseFloat(coins.toPrecision(4))} coins`;
 }
 
-const COLS = [
-  "Rank",
-  "Wallet",
-  "Coins Held",
-  "First Purchase",
-  "Total Spent",
-  "Loyalty Badge",
-];
+const COLS = ["Rank", "Wallet", "Coins Held", "Loyalty Badge"];
 
 export default function CollectorsTable({
   collectors,
