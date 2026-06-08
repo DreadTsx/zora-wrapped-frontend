@@ -33,7 +33,6 @@ app/
 ├── collections/page.tsx         # Collections overview
 ├── settings/page.tsx            # Settings and exports
 └── layout.tsx                   # Root layout
-
 components/
 ├── dashboard/                   # Dashboard components
 │   ├── DashboardClient.tsx
@@ -49,15 +48,17 @@ components/
 ├── collections/                 # Collection components
 │   └── CollectionsClient.tsx
 └── settings/                    # Settings components
-    └── SettingsClient.tsx
-
+│   └── SettingsClient.tsx
+│   ├── SettingsSection.tsx
+│   └── Toggle.tsx
 lib/
-├── zora.ts                      # Type definitions
-├── queries.ts                   # API functions
-└── format.ts                    # Formatting utilities
-
+│  ├── zora.ts                      # Type definitions
+│  ├── queries.ts                   # API functions
+│  └── format.ts                    # Formatting utilities
+│
 providers/
-└── CurrencyProvider.tsx         # ETH/USD toggle context
+    ├── CurrencyProvider.tsx           # ETH/USD toggle context
+    └── QueryProvider.tsx              # React Query Provider  
 ```
 
 ## Getting Started
