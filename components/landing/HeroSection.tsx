@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import WalletInput from "./WalletInput";
 
-/* Stagger helper */
 function AnimateIn({
   children,
   delay = 0,
@@ -39,14 +38,13 @@ export default function HeroSection() {
   return (
     <section
       className="
-      relative flex flex-col items-center justify-center text-center
-      px-5 md:px-16
-      pt-20 md:pt-36
-      pb-16 md:pb-24
-      overflow-hidden
-    "
+        relative flex flex-col items-center justify-center text-center
+        px-6 md:px-16
+        pt-16 md:pt-36
+        pb-12 md:pb-24
+        overflow-hidden
+      "
     >
-      {/* Ambient amber glow behind headline (somewhat like a background)*/}
       <div
         aria-hidden
         className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2"
@@ -59,12 +57,14 @@ export default function HeroSection() {
         }}
       />
 
-      {/* Headline  */}
+      <div className="h-8 md:h-0" />
+
+      {/* Headline */}
       <AnimateIn delay={80}>
         <h1
           className="font-playfair font-bold text-on-surface leading-[1.08] text-balance"
           style={{
-            fontSize: "clamp(42px, 8.5vw, 76px)",
+            fontSize: "clamp(36px, 8vw, 76px)",
             letterSpacing: "-0.025em",
             maxWidth: "820px",
           }}
@@ -75,19 +75,23 @@ export default function HeroSection() {
       </AnimateIn>
 
       {/* Subtitle */}
-      <AnimateIn delay={220} className="mt-5 md:mt-6">
-        <p className="font-sora text-on-variant text-base md:text-lg max-w-sm md:max-w-md leading-relaxed">
+      <AnimateIn delay={220} className="mt-4 md:mt-6">
+        <p
+          className="font-sora text-on-variant leading-relaxed"
+          style={{
+            fontSize: "clamp(14px, 3.5vw, 18px)",
+            maxWidth: "320px",
+          }}
+        >
           Paste your Zora wallet. See your creator analytics.
         </p>
       </AnimateIn>
 
-      {/*Wallet Input*/}
-      <AnimateIn delay={380} className="w-full max-w-2xl mt-10 md:mt-14">
+      <AnimateIn delay={380} className="w-full mt-8 md:mt-14">
         <WalletInput />
       </AnimateIn>
 
-      {/* Powered-by badge */}
-      <AnimateIn delay={520} className="mt-8">
+      <AnimateIn delay={520} className="mt-6 md:mt-8">
         <div className="flex items-center gap-2">
           <div className="w-1 h-1 bg-primary" />
           <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-outline/50">

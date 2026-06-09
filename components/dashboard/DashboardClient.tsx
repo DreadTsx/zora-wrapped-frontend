@@ -44,7 +44,6 @@ export default function DashboardClient() {
       </div>
     );
 
-  // Avatar initials fallback
   const initials = stats.name
     ? stats.name
         .split(/\s+/)
@@ -60,11 +59,14 @@ export default function DashboardClient() {
         style={{
           flex: 1,
           minWidth: 0,
+          maxWidth: "100%",
+          overflow: "hidden",
           display: "flex",
           flexDirection: "column",
           gap: 20,
         }}
       >
+        {/* Page heading */}
         <div
           style={{
             display: "flex",
@@ -74,13 +76,19 @@ export default function DashboardClient() {
             flexWrap: "wrap",
           }}
         >
-          {/* Creator identity */}
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              minWidth: 0,
+            }}
+          >
             {/* Avatar */}
             <div
               style={{
-                width: 52,
-                height: 52,
+                width: 44,
+                height: 44,
                 background: "#1c1b1b",
                 border: "1px solid #2a2a2a",
                 flexShrink: 0,
@@ -93,7 +101,7 @@ export default function DashboardClient() {
                   src={stats.avatar}
                   alt={stats.name}
                   fill
-                  sizes="52px"
+                  sizes="44px"
                   style={{ objectFit: "cover" }}
                   unoptimized
                 />
@@ -110,7 +118,7 @@ export default function DashboardClient() {
                   <span
                     style={{
                       fontFamily: "var(--f-mono)",
-                      fontSize: 13,
+                      fontSize: 11,
                       color: "#9f8e7a",
                     }}
                   >
@@ -120,15 +128,19 @@ export default function DashboardClient() {
               )}
             </div>
 
-            {/* Name + label */}
-            <div>
+            <div style={{ minWidth: 0 }}>
               <h1
                 style={{
                   fontFamily: "var(--f-serif)",
                   fontWeight: 700,
-                  fontSize: "clamp(22px, 3.5vw, 38px)",
+                  fontSize: "clamp(20px, 4vw, 38px)",
                   color: "#e5e2e1",
                   lineHeight: 1.1,
+
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  maxWidth: "55vw",
                 }}
               >
                 {stats.name || "Dashboard"}
@@ -140,7 +152,7 @@ export default function DashboardClient() {
                   textTransform: "uppercase",
                   letterSpacing: "0.18em",
                   color: "#9f8e7a55",
-                  marginTop: 5,
+                  marginTop: 4,
                 }}
               >
                 Overview &amp; Analytics
@@ -156,13 +168,14 @@ export default function DashboardClient() {
           <StatCards stats={stats} />
         </div>
 
-        {/* Chart */}
-        <VolumeChart data={growth} />
+        <div style={{ overflow: "hidden" }}>
+          <VolumeChart data={growth} />
+        </div>
 
-        {/* Top buyers */}
-        <TopBuyersList buyers={buyers} />
+        <div style={{ overflow: "hidden" }}>
+          <TopBuyersList buyers={buyers} />
+        </div>
 
-        {/* Mobile: AI chat inline */}
         <div className="mobile-only" style={{ flexDirection: "column" }}>
           <InsightsAIChat stats={stats} />
         </div>

@@ -1,13 +1,13 @@
-import SiteHeader     from "@/components/landing/SiteHeader";
-import HeroSection    from "@/components/landing/HeroSection";
+import SiteHeader from "@/components/landing/SiteHeader";
+import HeroSection from "@/components/landing/HeroSection";
 import DashboardPreview from "@/components/landing/DashboardPreview";
-import SiteFooter     from "@/components/landing/SiteFooter";
+import SiteFooter from "@/components/landing/SiteFooter";
 
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-background flex flex-col overflow-hidden">
       {/* Mobile-only top bar */}
-      <SiteHeader />
+      {/* <SiteHeader /> */}
 
       {/* Headline + wallet input */}
       <HeroSection />
