@@ -39,9 +39,9 @@ export default function HeroSection() {
     <section
       className="
         relative flex flex-col items-center justify-center text-center
-        px-6 md:px-16
-        pt-16 md:pt-36
-        pb-12 md:pb-24
+        px-5 md:px-16
+        pt-20 md:pt-36
+        pb-16 md:pb-24
         overflow-hidden
       "
     >
@@ -87,7 +87,7 @@ export default function HeroSection() {
         </p>
       </AnimateIn>
 
-      <AnimateIn delay={380} className="w-full mt-8 md:mt-14">
+      <AnimateIn delay={380} className="w-full max-w-2xl mt-10 md:mt-14">
         <WalletInput />
       </AnimateIn>
 
