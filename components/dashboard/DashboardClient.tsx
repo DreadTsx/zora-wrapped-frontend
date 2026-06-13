@@ -9,6 +9,7 @@ import TopBuyersList from "./TopBuyersList";
 import InsightsAIChat from "./InsightsAIChat";
 import ShareCardModal from "./ShareCardModal";
 import DashboardLoader from "./DashboardLoader";
+import { ChartErrorBoundary } from "../AppErrorBoundary";
 
 export default function DashboardClient() {
   const searchParams = useSearchParams();
@@ -168,13 +169,17 @@ export default function DashboardClient() {
           <StatCards stats={stats} />
         </div>
 
-        <div style={{ overflow: "hidden" }}>
-          <VolumeChart data={growth} />
-        </div>
+        <ChartErrorBoundary>
+          <div style={{ overflow: "hidden" }}>
+            <VolumeChart data={growth} />
+          </div>
+        </ChartErrorBoundary>
 
-        <div style={{ overflow: "hidden" }}>
-          <TopBuyersList buyers={buyers} />
-        </div>
+        <ChartErrorBoundary>
+          <div style={{ overflow: "hidden" }}>
+            <TopBuyersList buyers={buyers} />
+          </div>
+        </ChartErrorBoundary>
 
         <div className="mobile-only" style={{ flexDirection: "column" }}>
           <InsightsAIChat stats={stats} />

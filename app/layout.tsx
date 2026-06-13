@@ -3,6 +3,7 @@ import { Playfair_Display, Sora, Space_Mono } from "next/font/google";
 import QueryProvider from "@/providers/QueryProvider";
 import { CurrencyProvider } from "@/providers/CurrencyProvider";
 import "./globals.css";
+import { AppErrorBoundary } from "@/components/AppErrorBoundary";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -66,7 +67,9 @@ export default function RootLayout({
     >
       <body className="bg-background text-on-surface font-sora antialiased">
         <QueryProvider>
-          <CurrencyProvider>{children}</CurrencyProvider>
+          <CurrencyProvider>
+            <AppErrorBoundary>{children}</AppErrorBoundary>
+          </CurrencyProvider>
         </QueryProvider>
       </body>
     </html>
