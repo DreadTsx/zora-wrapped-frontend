@@ -51,6 +51,14 @@ export const metadata: Metadata = {
     title: "Zora Wrapped",
     description: "Your onchain story, told beautifully.",
     type: "website",
+    images: [
+      {
+        url: "/api/og?wallet=default",
+        width: 1200,
+        height: 630,
+        alt: "Zora Wrapped Dashboard",
+      },
+    ],
   },
   twitter: { card: "summary_large_image" },
 };
