@@ -23,17 +23,17 @@
 
 /*Tailwind theme override  */
 @theme {
-  --color-bg: #131313;
-  --color-surface: #141414;
-  --color-surface-low: #1c1b1b;
-  --color-surface-high: #2a2a2a;
-  --color-surface-base: #0e0e0e;
-  --color-primary: #f5a623;
-  --color-primary-dim: #ffb955;
-  --color-on-surface: #e5e2e1;
-  --color-on-variant: #d7c3ae;
-  --color-outline: #9f8e7a;
-  --color-error: #ff4444;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-low: var(--surface-low);
+  --color-surface-high: var(--surface-high);
+  --color-surface-base: var(--surface-base);
+  --color-primary: var(--primary);
+  --color-primary-dim: var(--primary-dim);
+  --color-on-surface: var(--on-surface);
+  --color-on-variant: var(--on-variant);
+  --color-outline: var(--outline);
+  --color-error: var(--error);
 
   --radius: 0px;
   --radius-sm: 0px;
@@ -189,4 +189,20 @@ body::before {
   .dash-pad {
     padding: 32px 36px;
   }
+}
+
+/* Light mode theme - defined after @theme to have higher specificity */
+html[data-theme="light"] {
+  --bg: #f5f0e8;
+  --surface: #ffffff;
+  --surface-low: #f0e8df;
+  --surface-high: #e8dfd5;
+  --surface-base: #fafaf8;
+  --primary: #f5a623;
+  --primary-dim: #ffb955;
+  --on-surface: #2a2522;
+  --on-variant: #6b5d4f;
+  --outline: #b3a895;
+  --outline-dim: #d4cac0;
+  --error: #c41e3a;
 }

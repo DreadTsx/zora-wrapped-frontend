@@ -10,6 +10,7 @@ import { getCollections, getCollectors } from "@/lib/zora";
 
 //Types
 type Currency = "ETH" | "USD";
+type Theme = "DARK" | "LIGHT";
 
 interface NotifState {
   newHolder: boolean;
@@ -92,7 +93,7 @@ function SettingRow({
         justifyContent: "space-between",
         gap: 24,
         padding: "20px 24px",
-        borderBottom: last ? "none" : "1px solid #2a2a2a",
+        borderBottom: last ? "none" : "1px solid var(--surface-high)",
       }}
     >
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -101,7 +102,7 @@ function SettingRow({
             fontFamily: "var(--f-sans)",
             fontSize: 15,
             fontWeight: 500,
-            color: "#e5e2e1",
+            color: "var(--on-surface)",
             marginBottom: 4,
           }}
         >
@@ -111,7 +112,8 @@ function SettingRow({
           style={{
             fontFamily: "var(--f-mono)",
             fontSize: 11,
-            color: "#9f8e7a66",
+            color: "var(--outline)",
+            opacity: 0.6,
             letterSpacing: "0.04em",
             lineHeight: 1.5,
           }}
@@ -150,10 +152,10 @@ function PillGroup({
               letterSpacing: "0.12em",
               textTransform: "uppercase",
               padding: "8px 18px",
-              background: active ? "#F5A623" : "#1c1b1b",
-              color: active ? "#000" : opt.locked ? "#9f8e7a33" : "#9f8e7a",
-              border: "1px solid #2a2a2a",
-              borderLeft: i > 0 ? "none" : "1px solid #2a2a2a",
+              background: active ? "#F5A623" : "var(--surface-low)",
+              color: active ? "#000" : opt.locked ? "var(--outline-dim)" : "var(--outline)",
+              border: "1px solid var(--surface-high)",
+              borderLeft: i > 0 ? "none" : "1px solid var(--surface-high)",
               cursor: opt.locked ? "not-allowed" : "pointer",
               transition: "all 0.15s",
               display: "flex",
@@ -202,6 +204,17 @@ export default function SettingsClient() {
     return "ETH";
   });
 
+  const [theme, setThemeLocal] = useState<Theme>(() => {
+    try {
+      const stored = localStorage.getItem("zw-settings");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.theme) return parsed.theme as Theme;
+      }
+    } catch {}
+    return "DARK";
+  });
+
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
   const [toggleToast, setToggleToast] = useState<{
@@ -212,8 +225,14 @@ export default function SettingsClient() {
 
   const handleSave = () => {
     try {
-      localStorage.setItem("zw-settings", JSON.stringify({ notifs, currency }));
+      localStorage.setItem("zw-settings", JSON.stringify({ notifs, currency, theme }));
       setGlobalCurrency(currency);
+      // Apply theme to HTML element
+      if (theme === "LIGHT") {
+        document.documentElement.setAttribute("data-theme", "light");
+      } else {
+        document.documentElement.removeAttribute("data-theme");
+      }
     } catch {}
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -245,6 +264,19 @@ export default function SettingsClient() {
     setTimeout(() => setCurrencyToast(null), 1800);
   };
 
+  const handleThemeChange = (t: string) => {
+    const next = t as Theme;
+    setThemeLocal(next);
+    // Apply theme immediately
+    if (next === "LIGHT") {
+      document.documentElement.setAttribute("data-theme", "light");
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+    }
+    setCurrencyToast(next === "LIGHT" ? "Switched to Light" : "Switched to Dark");
+    setTimeout(() => setCurrencyToast(null), 1800);
+  };
+
   const setNotif = (key: keyof NotifState) => (val: boolean) => {
     setNotifs((prev) => ({ ...prev, [key]: val }));
     setToggleToast({ label: NOTIF_LABELS[key], on: val });
@@ -271,7 +303,7 @@ export default function SettingsClient() {
           transform: `translateX(-50%) translateY(${copied ? "0px" : "12px"})`,
           opacity: copied ? 1 : 0,
           transition: "opacity 0.2s ease, transform 0.2s ease",
-          background: "#141414",
+          background: "var(--surface)",
           border: "1px solid #F5A623",
           padding: "10px 20px",
           display: "flex",
@@ -307,7 +339,7 @@ export default function SettingsClient() {
           transform: `translateX(-50%) translateY(${currencyToast ? "0px" : "12px"})`,
           opacity: currencyToast ? 1 : 0,
           transition: "opacity 0.2s ease, transform 0.2s ease",
-          background: "#141414",
+          background: "var(--surface)",
           border: "1px solid #F5A623",
           padding: "10px 20px",
           display: "flex",
@@ -343,7 +375,7 @@ export default function SettingsClient() {
           transform: `translateX(-50%) translateY(${toggleToast ? "0px" : "12px"})`,
           opacity: toggleToast ? 1 : 0,
           transition: "opacity 0.2s ease, transform 0.2s ease",
-          background: "#141414",
+          background: "var(--surface)",
           border: `1px solid ${toggleToast?.on ? "#22c55e" : "#ff4444"}`,
           padding: "10px 20px",
           display: "flex",
@@ -376,13 +408,13 @@ export default function SettingsClient() {
       </div>
 
       {/* Page heading  */}
-      <div style={{ paddingBottom: 8, borderBottom: "1px solid #2a2a2a" }}>
+      <div style={{ paddingBottom: 8, borderBottom: "1px solid var(--surface-high)" }}>
         <h1
           style={{
             fontFamily: "var(--f-serif)",
             fontWeight: 700,
             fontSize: "clamp(28px,4vw,42px)",
-            color: "#e5e2e1",
+            color: "var(--on-surface)",
             lineHeight: 1.1,
           }}
         >
@@ -392,7 +424,8 @@ export default function SettingsClient() {
           style={{
             fontFamily: "var(--f-mono)",
             fontSize: 11,
-            color: "#9f8e7a55",
+            color: "var(--outline)",
+            opacity: 0.4,
             marginTop: 6,
             letterSpacing: "0.1em",
             textTransform: "uppercase",
@@ -420,7 +453,8 @@ export default function SettingsClient() {
                 fontSize: 10,
                 textTransform: "uppercase",
                 letterSpacing: "0.14em",
-                color: "#9f8e7a66",
+                color: "var(--outline)",
+                opacity: 0.4,
                 marginBottom: 10,
               }}
             >
@@ -433,8 +467,8 @@ export default function SettingsClient() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                background: "#1c1b1b",
-                border: "1px solid #2a2a2a",
+                background: "var(--surface-low)",
+                border: "1px solid var(--surface-high)",
                 padding: "12px 16px",
                 marginBottom: 12,
               }}
@@ -467,9 +501,10 @@ export default function SettingsClient() {
                   background: "none",
                   border: "none",
                   cursor: "pointer",
-                  color: copied ? "#F5A623" : "#9f8e7a55",
+                  color: copied ? "#F5A623" : "var(--outline)",
+                  opacity: copied ? 1 : 0.4,
                   display: "flex",
-                  transition: "color 0.15s",
+                  transition: "color 0.15s, opacity 0.15s",
                 }}
               >
                 <Copy size={14} strokeWidth={1.5} />
@@ -492,18 +527,21 @@ export default function SettingsClient() {
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
                 background: "transparent",
-                color: "#e5e2e1",
-                border: "1px solid #e5e2e155",
+                color: "var(--on-surface)",
+                border: "1px solid var(--on-surface)",
+                opacity: 0.5,
                 cursor: "pointer",
-                transition: "border-color 0.15s, color 0.15s",
+                transition: "border-color 0.15s, color 0.15s, opacity 0.15s",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = "#ff4444";
                 e.currentTarget.style.color = "#ff4444";
+                e.currentTarget.style.opacity = "1";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "#e5e2e155";
-                e.currentTarget.style.color = "#e5e2e1";
+                e.currentTarget.style.borderColor = "var(--on-surface)";
+                e.currentTarget.style.color = "var(--on-surface)";
+                e.currentTarget.style.opacity = "0.5";
               }}
             >
               <LogOut size={13} strokeWidth={2} />
@@ -576,11 +614,11 @@ export default function SettingsClient() {
             last
             right={
               <PillGroup
-                value="DARK"
-                onChange={() => {}}
+                value={theme}
+                onChange={handleThemeChange}
                 options={[
                   { label: "Dark", value: "DARK" },
-                  { label: "Light (Locked)", value: "LIGHT", locked: true },
+                  { label: "Light", value: "LIGHT" },
                 ]}
               />
             }
@@ -606,8 +644,8 @@ export default function SettingsClient() {
                   textTransform: "uppercase",
                   padding: "9px 16px",
                   background: "transparent",
-                  color: "#e5e2e1",
-                  border: "1px solid #2a2a2a",
+                  color: "var(--on-surface)",
+                  border: "1px solid var(--surface-high)",
                   cursor: "pointer",
                   transition: "border-color 0.15s, color 0.15s",
                   whiteSpace: "nowrap",
@@ -617,8 +655,8 @@ export default function SettingsClient() {
                   e.currentTarget.style.color = "#F5A623";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "#2a2a2a";
-                  e.currentTarget.style.color = "#e5e2e1";
+                  e.currentTarget.style.borderColor = "var(--surface-high)";
+                  e.currentTarget.style.color = "var(--on-surface)";
                 }}
               >
                 <Download size={13} strokeWidth={2} />
@@ -644,8 +682,8 @@ export default function SettingsClient() {
                   textTransform: "uppercase",
                   padding: "9px 16px",
                   background: "transparent",
-                  color: "#e5e2e1",
-                  border: "1px solid #2a2a2a",
+                  color: "var(--on-surface)",
+                  border: "1px solid var(--surface-high)",
                   cursor: "pointer",
                   transition: "border-color 0.15s, color 0.15s",
                   whiteSpace: "nowrap",
@@ -655,8 +693,8 @@ export default function SettingsClient() {
                   e.currentTarget.style.color = "#F5A623";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "#2a2a2a";
-                  e.currentTarget.style.color = "#e5e2e1";
+                  e.currentTarget.style.borderColor = "var(--surface-high)";
+                  e.currentTarget.style.color = "var(--on-surface)";
                 }}
               >
                 <Users size={13} strokeWidth={2} />
@@ -687,7 +725,7 @@ export default function SettingsClient() {
               textTransform: "uppercase",
               background: "transparent",
               border: "none",
-              color: saved ? "#F5A623" : "#e5e2e1",
+              color: saved ? "#F5A623" : "var(--on-surface)",
               cursor: "pointer",
               transition: "color 0.2s",
             }}

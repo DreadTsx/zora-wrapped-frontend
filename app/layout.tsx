@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, Sora, Space_Mono } from "next/font/google";
 import QueryProvider from "@/providers/QueryProvider";
 import { CurrencyProvider } from "@/providers/CurrencyProvider";
+import { ThemeProvider } from "@/providers/ThemeProvider";
 import "./globals.css";
 import { AppErrorBoundary } from "@/components/AppErrorBoundary";
 
@@ -65,10 +66,29 @@ export default function RootLayout({
       lang="en"
       className={`${playfair.variable} ${sora.variable} ${spaceMono.variable}`}
     >
-      <body className="bg-background text-on-surface font-sora antialiased">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const stored = localStorage.getItem('zw-settings');
+                if (stored) {
+                  const parsed = JSON.parse(stored);
+                  if (parsed.theme === 'LIGHT') {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                  }
+                }
+              } catch {}
+            `,
+          }}
+        />
+      </head>
+      <body className="font-sora antialiased" style={{ background: "var(--bg)", color: "var(--on-surface)" }}>
         <QueryProvider>
           <CurrencyProvider>
-            <AppErrorBoundary>{children}</AppErrorBoundary>
+            <ThemeProvider>
+              <AppErrorBoundary>{children}</AppErrorBoundary>
+            </ThemeProvider>
           </CurrencyProvider>
         </QueryProvider>
       </body>
