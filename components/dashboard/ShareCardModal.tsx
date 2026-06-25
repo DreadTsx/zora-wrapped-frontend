@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { X, Download, Share2, Twitter, MessageCircle, Send } from "lucide-react";
+import { X, Download, Share2 } from "lucide-react";
 import type { CreatorStats } from "@/lib/zora";
 
 export default function ShareCardModal({ stats }: { stats: CreatorStats }) {
@@ -395,11 +395,11 @@ export default function ShareCardModal({ stats }: { stats: CreatorStats }) {
                 </span>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8 }}>
                   {[
-                    { id: "twitter", label: "Twitter", icon: Twitter },
-                    { id: "x", label: "X", icon: Twitter },
-                    { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
-                    { id: "telegram", label: "Telegram", icon: Send },
-                  ].map(({ id, label, icon: Icon }) => (
+                    { id: "twitter", label: "Twitter" },
+                    { id: "x", label: "X" },
+                    { id: "whatsapp", label: "WhatsApp" },
+                    { id: "telegram", label: "Telegram" },
+                  ].map(({ id, label }) => (
                     <button
                       key={id}
                       onClick={() => handleShare(id as any)}
@@ -407,7 +407,6 @@ export default function ShareCardModal({ stats }: { stats: CreatorStats }) {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        gap: 6,
                         padding: "10px 0",
                         fontFamily: "var(--f-mono)",
                         fontSize: 10,
@@ -428,7 +427,6 @@ export default function ShareCardModal({ stats }: { stats: CreatorStats }) {
                         (e.currentTarget as HTMLButtonElement).style.color = "#e5e2e1";
                       }}
                     >
-                      <Icon size={12} strokeWidth={2} />
                       {label}
                     </button>
                   ))}
