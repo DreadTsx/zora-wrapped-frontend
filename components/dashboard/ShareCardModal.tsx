@@ -29,11 +29,37 @@ export default function ShareCardModal({ stats }: { stats: CreatorStats }) {
 
   const handleShare = async () => {
     const text = `My Zora stats 🔥\n${stats.total_mints.toLocaleString()} total sales · ${stats.unique_holders.toLocaleString()} collectors · ${stats.volume_eth} ETH volume\n\nvia @ZoraWrapped`;
-    if (navigator.share)
-      await navigator.share({ text, url: window.location.href });
-    else {
+    if (navigator.share) {
+      try {
+        await navigator.share({ text, url: window.location.href });
+      } catch (err) {
+        // User cancelled or share failed, try clipboard fallback
+        copyToClipboard(text);
+      }
+    } else {
+      copyToClipboard(text);
+    }
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try {
       await navigator.clipboard.writeText(text);
       alert("Copied to clipboard!");
+    } catch (err) {
+      // Fallback for permissions policy or other clipboard errors
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand("copy");
+        alert("Copied to clipboard!");
+      } catch {
+        alert("Failed to copy. Please try again or use the download option.");
+      }
+      document.body.removeChild(textarea);
     }
   };
 
