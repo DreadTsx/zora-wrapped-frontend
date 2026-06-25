@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { X, Download, Share2 } from "lucide-react";
+import { X, Download, Share2, Twitter, MessageCircle, Send } from "lucide-react";
 import type { CreatorStats } from "@/lib/zora";
 
 export default function ShareCardModal({ stats }: { stats: CreatorStats }) {
@@ -27,15 +27,44 @@ export default function ShareCardModal({ stats }: { stats: CreatorStats }) {
     }
   };
 
-  const handleShare = () => {
+  const handleShare = (platform: "twitter" | "x" | "whatsapp" | "telegram" | "zora") => {
     const dashboardUrl = `${window.location.origin}/dashboard?wallet=${stats.wallet}`;
-    const tweetText = `Check out my Zora Wrapped 🔥\n\n${stats.total_mints.toLocaleString()} total sales · ${stats.unique_holders.toLocaleString()} collectors · ${stats.volume_eth} ETH volume\n\nvia @ZoraWrapped`;
-    
-    // Twitter intent URL
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(dashboardUrl)}`;
-    
-    // Open Twitter in new window
-    window.open(twitterUrl, "twitter-share", "width=550,height=420");
+    const shareText = `Check out my Zora Wrapped 🔥\n\n${stats.total_mints.toLocaleString()} total sales · ${stats.unique_holders.toLocaleString()} collectors · ${stats.volume_eth} ETH volume`;
+
+    let shareUrl = "";
+
+    switch (platform) {
+      case "twitter":
+      case "x":
+        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText + "\n\nvia @ZoraWrapped " + dashboardUrl)}`;
+        break;
+      case "whatsapp":
+        shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText + "\n\n" + dashboardUrl)}`;
+        break;
+      case "telegram":
+        shareUrl = `https://t.me/share/url?url=${encodeURIComponent(dashboardUrl)}&text=${encodeURIComponent(shareText)}`;
+        break;
+      case "zora":
+        // For Zora, copy URL to clipboard and open in new tab
+        navigator.clipboard.writeText(dashboardUrl).catch(() => {
+          const textarea = document.createElement("textarea");
+          textarea.value = dashboardUrl;
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.select();
+          try {
+            document.execCommand("copy");
+          } catch {
+            console.error("Failed to copy URL");
+          }
+          document.body.removeChild(textarea);
+        });
+        window.open("https://zora.co", "_blank");
+        return;
+    }
+
+    window.open(shareUrl, `${platform}-share`, "width=550,height=420");
   };
 
   const shortWallet = stats.wallet
@@ -319,11 +348,10 @@ export default function ShareCardModal({ stats }: { stats: CreatorStats }) {
             </div>
 
             {/* Action buttons */}
-            <div style={{ display: "flex", gap: 12, padding: "0 20px 20px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "0 20px 20px" }}>
               <button
                 onClick={handleDownload}
                 style={{
-                  flex: 1,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -349,34 +377,94 @@ export default function ShareCardModal({ stats }: { stats: CreatorStats }) {
                 <Download size={13} strokeWidth={2.5} />
                 Download
               </button>
+
+              {/* Share Platform Grid */}
+              <div>
+                <span
+                  style={{
+                    fontFamily: "var(--f-mono)",
+                    fontSize: 9,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.16em",
+                    color: "#9f8e7a77",
+                    display: "block",
+                    marginBottom: 10,
+                  }}
+                >
+                  Share on
+                </span>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8 }}>
+                  {[
+                    { id: "twitter", label: "Twitter", icon: Twitter },
+                    { id: "x", label: "X", icon: Twitter },
+                    { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
+                    { id: "telegram", label: "Telegram", icon: Send },
+                  ].map(({ id, label, icon: Icon }) => (
+                    <button
+                      key={id}
+                      onClick={() => handleShare(id as any)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 6,
+                        padding: "10px 0",
+                        fontFamily: "var(--f-mono)",
+                        fontSize: 10,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.1em",
+                        background: "transparent",
+                        color: "#e5e2e1",
+                        border: "1px solid #2a2a2a",
+                        cursor: "pointer",
+                        transition: "all 0.15s",
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLButtonElement).style.borderColor = "#F5A623";
+                        (e.currentTarget as HTMLButtonElement).style.color = "#F5A623";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLButtonElement).style.borderColor = "#2a2a2a";
+                        (e.currentTarget as HTMLButtonElement).style.color = "#e5e2e1";
+                      }}
+                    >
+                      <Icon size={12} strokeWidth={2} />
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Zora section - standalone */}
               <button
-                onClick={handleShare}
+                onClick={() => handleShare("zora")}
                 style={{
-                  flex: 1,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 8,
-                  padding: "11px 0",
+                  padding: "10px 0",
                   fontFamily: "var(--f-mono)",
-                  fontSize: 11,
+                  fontSize: 10,
                   textTransform: "uppercase",
-                  letterSpacing: "0.12em",
+                  letterSpacing: "0.1em",
                   background: "transparent",
                   color: "#e5e2e1",
-                  border: "1px solid #e5e2e1",
+                  border: "1px solid #2a2a2a",
                   cursor: "pointer",
-                  transition: "border-color 0.15s",
+                  transition: "all 0.15s",
                 }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.borderColor = "#F5A623")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.borderColor = "#e5e2e1")
-                }
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = "#F5A623";
+                  (e.currentTarget as HTMLButtonElement).style.color = "#F5A623";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = "#2a2a2a";
+                  (e.currentTarget as HTMLButtonElement).style.color = "#e5e2e1";
+                }}
               >
-                <Share2 size={13} strokeWidth={2.5} />
-                Share
+                <Share2 size={12} strokeWidth={2} />
+                Share on Zora
               </button>
             </div>
           </div>
